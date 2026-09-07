@@ -1,0 +1,32 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <id>com.samsad.adbcontroller</id>
+    <name>Samsad ADB Controller</name>
+    <vendor email="support@example.com" url="https://example.com">Samsad Development</vendor>
+
+    <description><![CDATA[
+    Fast, offline ADB control panel for Android Studio & IntelliJ IDEA.<br>
+    Features:
+    <ul>
+        <li><b>Connected Device Manager</b>: Auto-detects connected emulators & physical devices.</li>
+        <li><b>App Actions Grid</b>: 1-click <i>Clear App Data</i>, <i>Force Restart</i>, <i>Force Stop</i>, and <i>Uninstall</i>.</li>
+        <li><b>Device Utilities Grid</b>: 1-click <i>Toggle Dark Mode</i>, <i>Toggle Layout Bounds</i>, <i>Toggle Animations</i>, and <i>Screenshot to Clipboard</i>.</li>
+        <li><b>Auto Package Detection</b>: Detects app applicationId / namespace from project files automatically.</li>
+    </ul>
+    ]]></description>
+
+    <!-- Dependencies -->
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Persistent Application Services -->
+        <applicationService serviceImplementation="com.samsad.adb.services.AdbExecutor"/>
+
+        <!-- Tool Window registered on the right sidebar -->
+        <toolWindow
+                id="Samsad ADB"
+                anchor="right"
+                factoryClass="com.samsad.adb.ui.AdbToolWindowFactory"
+                icon="AllIcons.Actions.Lighting"/>
+    </extensions>
+</idea-plugin>
