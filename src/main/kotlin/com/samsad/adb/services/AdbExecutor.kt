@@ -144,7 +144,13 @@ class AdbExecutor {
      * Toggles Dark/Light Mode on device.
      */
     fun toggleDarkMode(deviceId: String): Result<String> {
-        return runAdb(deviceId, "shell", "cmd", "uimode", "night", "toggle")
+        val current = runAdb(deviceId, "shell", "cmd", "uimode", "night").getOrDefault("")
+        val isNight = current.contains("yes", ignoreCase = true)
+        val targetMode = if (isNight) "no" else "yes"
+        val switchResult = runAdb(deviceId, "shell", "cmd", "uimode", "night", targetMode)
+        return switchResult.map {
+            if (targetMode == "yes") "Dark Mode set to ON" else "Dark Mode set to OFF"
+        }
     }
 
     /**
