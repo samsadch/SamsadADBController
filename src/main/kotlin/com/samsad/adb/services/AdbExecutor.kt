@@ -18,8 +18,9 @@ data class AdbDevice(
     val isEmulator: Boolean
 ) {
     override fun toString(): String {
-        val type = if (isEmulator) "📱 Emulator" else "📲 Physical Device"
-        return "$type: $model ($id)"
+        val type = if (isEmulator) "Emulator" else "Device"
+        val cleanModel = model.replace('_', ' ')
+        return "📱 $type: $cleanModel ($id)"
     }
 }
 

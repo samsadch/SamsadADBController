@@ -2,6 +2,7 @@
 .gradle/
 build/
 out/
+.intellijPlatform/
 
 # IDE / IntelliJ / Android Studio
 .idea/

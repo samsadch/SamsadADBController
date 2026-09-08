@@ -10,45 +10,62 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.JBColor
-import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.JBUI
 import java.awt.*
+import java.awt.event.MouseAdapter
+import java.awt.event.MouseEvent
 import javax.swing.*
 
-class AdbMainPanel(private val project: Project) : JPanel(BorderLayout(0, 10)) {
+class AdbMainPanel(private val project: Project) : JPanel(BorderLayout()) {
 
-    private val deviceComboBox = ComboBox<AdbDevice>()
-    private val refreshDevicesButton = createStyledButton("🔄 Refresh")
+    private val deviceComboBox = ComboBox<AdbDevice>().apply {
+        font = JBUI.Fonts.label(12f)
+        preferredSize = Dimension(preferredSize.width, 34)
+        minimumSize = Dimension(120, 34)
+        maximumSize = Dimension(Int.MAX_VALUE, 34)
+    }
+
+    private val refreshDevicesButton = ModernButton("🔄", cornerRadius = 6).apply {
+        toolTipText = "Refresh connected devices"
+        preferredSize = Dimension(40, 34)
+        minimumSize = Dimension(40, 34)
+        maximumSize = Dimension(40, 34)
+    }
 
     private val packageNameField = JBTextField().apply {
-        emptyText.text = "e.g. com.example.myapp"
-        font = font.deriveFont(13f)
+        emptyText.text = "com.example.android.myapp"
+        font = JBUI.Fonts.label(12f)
+        preferredSize = Dimension(preferredSize.width, 34)
+        minimumSize = Dimension(120, 34)
+        maximumSize = Dimension(Int.MAX_VALUE, 34)
     }
-    private val detectPackageButton = createStyledButton("🔍 Auto Detect")
 
-    // Status Banner Label
-    private val statusIconLabel = JBLabel("ℹ️")
-    private val statusTextLabel = JBLabel("Ready").apply {
-        font = font.deriveFont(Font.BOLD, 12f)
-        foreground = JBColor.GRAY
+    private val detectPackageButton = ModernButton("Auto Detect", cornerRadius = 6).apply {
+        toolTipText = "Scan workspace files for Android package name"
+        preferredSize = Dimension(100, 34)
+        minimumSize = Dimension(100, 34)
+        maximumSize = Dimension(100, 34)
     }
 
     // App Control Buttons
-    private val restartAppButton = createActionButton("🔄 Restart App", isPrimary = true)
-    private val clearDataButton = createActionButton("🧹 Clear App Data")
-    private val forceStopButton = createActionButton("🛑 Force Stop")
-    private val uninstallAppButton = createActionButton("🗑️ Uninstall App")
+    private val restartAppButton = ModernButton("🔄  Restart App")
+    private val clearDataButton = ModernButton("🧹  Clear App Data")
+    private val forceStopButton = ModernButton("🛑  Force Stop")
+    private val uninstallAppButton = ModernButton("🗑️  Uninstall App")
 
     // Device Control Buttons
-    private val screenshotButton = createActionButton("📸 Screenshot to Clipboard", isPrimary = true)
-    private val toggleDarkModeButton = createActionButton("🌗 Toggle Dark Mode")
-    private val toggleLayoutBoundsButton = createActionButton("📐 Toggle Layout Bounds")
-    private val toggleAnimationsButton = createActionButton("⚡ Toggle Animations")
+    private val screenshotButton = ModernButton("📸  Screenshot to Clipboard")
+    private val toggleDarkModeButton = ModernButton("🌗  Toggle Dark Mode")
+    private val toggleLayoutBoundsButton = ModernButton("📐  Toggle Layout Bounds")
+    private val toggleAnimationsButton = ModernButton("⚡  Toggle Animations")
+
+    // Status Pill
+    private val statusBadge = StatusBadge()
 
     init {
-        border = JBUI.Borders.empty(12)
+        border = JBUI.Borders.empty(14)
         background = JBColor.namedColor("ToolWindow.background", JBColor(0xF9F9F9, 0x1E1F22))
 
         val contentPanel = JPanel().apply {
@@ -56,18 +73,45 @@ class AdbMainPanel(private val project: Project) : JPanel(BorderLayout(0, 10)) {
             isOpaque = false
         }
 
-        contentPanel.add(createHeaderCard())
-        contentPanel.add(Box.createRigidArea(Dimension(0, 12)))
-        contentPanel.add(createAppActionsCard())
-        contentPanel.add(Box.createRigidArea(Dimension(0, 12)))
-        contentPanel.add(createDeviceUtilitiesCard())
-        contentPanel.add(Box.createRigidArea(Dimension(0, 12)))
-        contentPanel.add(createStatusBanner())
+        // Top Target Device & Package Name controls
+        contentPanel.add(createInputSection())
+        contentPanel.add(Box.createRigidArea(Dimension(0, 14)))
+
+        // Section 1: App Management
+        val appGrid = JPanel(GridLayout(2, 2, 8, 8)).apply {
+            isOpaque = false
+            add(restartAppButton)
+            add(clearDataButton)
+            add(forceStopButton)
+            add(uninstallAppButton)
+        }
+        contentPanel.add(SectionCard("1. App Management", appGrid))
+        contentPanel.add(Box.createRigidArea(Dimension(0, 14)))
+
+        // Section 2: Device Quick Tools
+        val deviceGrid = JPanel(GridLayout(2, 2, 8, 8)).apply {
+            isOpaque = false
+            add(screenshotButton)
+            add(toggleDarkModeButton)
+            add(toggleLayoutBoundsButton)
+            add(toggleAnimationsButton)
+        }
+        contentPanel.add(SectionCard("2. Device Quick Tools", deviceGrid))
+        contentPanel.add(Box.createRigidArea(Dimension(0, 14)))
+
+        // Status badge row
+        val statusRow = JPanel(FlowLayout(FlowLayout.LEFT, 0, 0)).apply {
+            isOpaque = false
+            add(statusBadge)
+        }
+        contentPanel.add(statusRow)
+        contentPanel.add(Box.createVerticalGlue())
 
         val scrollPane = JBScrollPane(contentPanel).apply {
             border = JBUI.Borders.empty()
             isOpaque = false
             viewport.isOpaque = false
+            horizontalScrollBarPolicy = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER
         }
 
         add(scrollPane, BorderLayout.CENTER)
@@ -76,119 +120,71 @@ class AdbMainPanel(private val project: Project) : JPanel(BorderLayout(0, 10)) {
         refreshDevicesButton.addActionListener { refreshConnectedDevices() }
         detectPackageButton.addActionListener { autoDetectPackageName() }
 
-        clearDataButton.addActionListener { runAdbTask("Clearing App Data") { deviceId, pkg -> AdbExecutor.getInstance().clearAppData(deviceId, pkg) } }
-        restartAppButton.addActionListener { runAdbTask("Restarting App") { deviceId, pkg -> AdbExecutor.getInstance().restartApp(deviceId, pkg) } }
-        forceStopButton.addActionListener { runAdbTask("Force Stopping App") { deviceId, pkg -> AdbExecutor.getInstance().forceStopApp(deviceId, pkg) } }
-        uninstallAppButton.addActionListener { runAdbTask("Uninstalling App") { deviceId, pkg -> AdbExecutor.getInstance().uninstallApp(deviceId, pkg) } }
+        clearDataButton.addActionListener { runAdbTask("Clear App Data") { deviceId, pkg -> AdbExecutor.getInstance().clearAppData(deviceId, pkg) } }
+        restartAppButton.addActionListener { runAdbTask("Restart App") { deviceId, pkg -> AdbExecutor.getInstance().restartApp(deviceId, pkg) } }
+        forceStopButton.addActionListener { runAdbTask("Force Stop") { deviceId, pkg -> AdbExecutor.getInstance().forceStopApp(deviceId, pkg) } }
+        uninstallAppButton.addActionListener { runAdbTask("Uninstall App") { deviceId, pkg -> AdbExecutor.getInstance().uninstallApp(deviceId, pkg) } }
 
-        toggleDarkModeButton.addActionListener { runDeviceTask("Toggling Dark Mode") { deviceId -> AdbExecutor.getInstance().toggleDarkMode(deviceId) } }
-        toggleLayoutBoundsButton.addActionListener { runDeviceTask("Toggling Layout Bounds") { deviceId -> AdbExecutor.getInstance().toggleLayoutBounds(deviceId) } }
-        toggleAnimationsButton.addActionListener { runDeviceTask("Toggling Animations") { deviceId -> AdbExecutor.getInstance().toggleAnimations(deviceId) } }
-        screenshotButton.addActionListener { runDeviceTask("Capturing Screenshot") { deviceId -> AdbExecutor.getInstance().captureScreenshotToClipboard(deviceId) } }
+        toggleDarkModeButton.addActionListener { runDeviceTask("Toggle Dark Mode") { deviceId -> AdbExecutor.getInstance().toggleDarkMode(deviceId) } }
+        toggleLayoutBoundsButton.addActionListener { runDeviceTask("Toggle Layout Bounds") { deviceId -> AdbExecutor.getInstance().toggleLayoutBounds(deviceId) } }
+        toggleAnimationsButton.addActionListener { runDeviceTask("Toggle Animations") { deviceId -> AdbExecutor.getInstance().toggleAnimations(deviceId) } }
+        screenshotButton.addActionListener { runDeviceTask("Screenshot") { deviceId -> AdbExecutor.getInstance().captureScreenshotToClipboard(deviceId) } }
 
         // Initial setup
         refreshConnectedDevices()
         autoDetectPackageName()
     }
 
-    private fun createHeaderCard(): JPanel {
-        val card = RoundedPanel()
-        card.layout = BorderLayout(0, 10)
-        card.border = JBUI.Borders.empty(12)
-
-        val devicePanel = JPanel(BorderLayout(8, 0)).apply {
-            isOpaque = false
-            add(JBLabel("Target Device:").apply { font = font.deriveFont(Font.BOLD, 12f) }, BorderLayout.NORTH)
-            val sub = JPanel(BorderLayout(6, 0)).apply {
-                isOpaque = false
-                add(deviceComboBox, BorderLayout.CENTER)
-                add(refreshDevicesButton, BorderLayout.EAST)
-            }
-            add(sub, BorderLayout.CENTER)
-        }
-
-        val packagePanel = JPanel(BorderLayout(8, 0)).apply {
-            isOpaque = false
-            add(JBLabel("Package Name:").apply { font = font.deriveFont(Font.BOLD, 12f) }, BorderLayout.NORTH)
-            val sub = JPanel(BorderLayout(6, 0)).apply {
-                isOpaque = false
-                add(packageNameField, BorderLayout.CENTER)
-                add(detectPackageButton, BorderLayout.EAST)
-            }
-            add(sub, BorderLayout.CENTER)
-        }
-
+    private fun createInputSection(): JPanel {
         val container = JPanel().apply {
             layout = BoxLayout(this, BoxLayout.Y_AXIS)
             isOpaque = false
-            add(devicePanel)
-            add(Box.createRigidArea(Dimension(0, 10)))
-            add(packagePanel)
         }
 
-        card.add(container, BorderLayout.CENTER)
-        return card
-    }
-
-    private fun createAppActionsCard(): JPanel {
-        val card = RoundedPanel()
-        card.layout = BorderLayout(0, 10)
-        card.border = JBUI.Borders.empty(12)
-
-        val title = JBLabel("📱 App Management").apply {
-            font = font.deriveFont(Font.BOLD, 13f)
-            foreground = JBColor.namedColor("Label.foreground", JBColor.BLACK)
+        // Target Device label
+        val deviceLabel = JLabel("Target Device").apply {
+            font = JBUI.Fonts.label(12f).deriveFont(Font.BOLD)
+            foreground = JBColor.namedColor("Label.foreground", JBColor(0x333333, 0xDFE1E5))
+            alignmentX = Component.LEFT_ALIGNMENT
         }
-
-        val grid = JPanel(GridLayout(2, 2, 8, 8)).apply {
+        val deviceRow = JPanel(BorderLayout(6, 0)).apply {
             isOpaque = false
-            add(restartAppButton)
-            add(clearDataButton)
-            add(forceStopButton)
-            add(uninstallAppButton)
+            maximumSize = Dimension(Int.MAX_VALUE, 34)
+            preferredSize = Dimension(preferredSize.width, 34)
+            alignmentX = Component.LEFT_ALIGNMENT
+            add(deviceComboBox, BorderLayout.CENTER)
+            add(refreshDevicesButton, BorderLayout.EAST)
         }
 
-        card.add(title, BorderLayout.NORTH)
-        card.add(grid, BorderLayout.CENTER)
-        return card
-    }
-
-    private fun createDeviceUtilitiesCard(): JPanel {
-        val card = RoundedPanel()
-        card.layout = BorderLayout(0, 10)
-        card.border = JBUI.Borders.empty(12)
-
-        val title = JBLabel("🛠️ Device Quick Tools").apply {
-            font = font.deriveFont(Font.BOLD, 13f)
-            foreground = JBColor.namedColor("Label.foreground", JBColor.BLACK)
+        // Package Name label
+        val packageLabel = JLabel("Package Name").apply {
+            font = JBUI.Fonts.label(12f).deriveFont(Font.BOLD)
+            foreground = JBColor.namedColor("Label.foreground", JBColor(0x333333, 0xDFE1E5))
+            alignmentX = Component.LEFT_ALIGNMENT
         }
-
-        val grid = JPanel(GridLayout(2, 2, 8, 8)).apply {
+        val packageRow = JPanel(BorderLayout(6, 0)).apply {
             isOpaque = false
-            add(screenshotButton)
-            add(toggleDarkModeButton)
-            add(toggleLayoutBoundsButton)
-            add(toggleAnimationsButton)
+            maximumSize = Dimension(Int.MAX_VALUE, 34)
+            preferredSize = Dimension(preferredSize.width, 34)
+            alignmentX = Component.LEFT_ALIGNMENT
+            add(packageNameField, BorderLayout.CENTER)
+            add(detectPackageButton, BorderLayout.EAST)
         }
 
-        card.add(title, BorderLayout.NORTH)
-        card.add(grid, BorderLayout.CENTER)
-        return card
-    }
+        container.add(deviceLabel)
+        container.add(Box.createRigidArea(Dimension(0, 6)))
+        container.add(deviceRow)
+        container.add(Box.createRigidArea(Dimension(0, 10)))
+        container.add(packageLabel)
+        container.add(Box.createRigidArea(Dimension(0, 6)))
+        container.add(packageRow)
 
-    private fun createStatusBanner(): JPanel {
-        val card = RoundedPanel(radius = 8, bgColor = JBColor.namedColor("Editor.background", JBColor(0xEEEEEE, 0x2B2D30)))
-        card.layout = FlowLayout(FlowLayout.LEFT, 8, 8)
-        card.border = JBUI.Borders.empty(2, 6)
-
-        card.add(statusIconLabel)
-        card.add(statusTextLabel)
-        return card
+        return container
     }
 
     private fun refreshConnectedDevices() {
         deviceComboBox.removeAllItems()
-        setStatus("⏳", "Scanning connected devices...", Color.GRAY)
+        statusBadge.setStatus(StatusBadge.StatusType.LOADING, "⏳ Scanning connected devices...")
 
         ProgressManager.getInstance().run(object : Task.Backgroundable(project, "Scanning Connected Devices", false) {
             override fun run(indicator: ProgressIndicator) {
@@ -196,10 +192,10 @@ class AdbMainPanel(private val project: Project) : JPanel(BorderLayout(0, 10)) {
                 ApplicationManager.getApplication().invokeLater {
                     deviceComboBox.removeAllItems()
                     if (devices.isEmpty()) {
-                        setStatus("✕", "No devices or emulators found.", JBColor.RED)
+                        statusBadge.setStatus(StatusBadge.StatusType.ERROR, "✕ No devices or emulators found")
                     } else {
                         devices.forEach { deviceComboBox.addItem(it) }
-                        setStatus("✓", "Found ${devices.size} connected device(s).", JBColor.GREEN)
+                        statusBadge.setStatus(StatusBadge.StatusType.SUCCESS, "✓ Connected: ${devices.size} device ready")
                     }
                 }
             }
@@ -207,7 +203,8 @@ class AdbMainPanel(private val project: Project) : JPanel(BorderLayout(0, 10)) {
     }
 
     private fun autoDetectPackageName() {
-        val baseDir = project.baseDir ?: return
+        val basePath = project.basePath ?: return
+        val baseDir = com.intellij.openapi.vfs.LocalFileSystem.getInstance().findFileByPath(basePath) ?: return
         ProgressManager.getInstance().run(object : Task.Backgroundable(project, "Detecting App Package Name", false) {
             override fun run(indicator: ProgressIndicator) {
                 val detectedPackage = scanPackageName(baseDir)
@@ -252,7 +249,7 @@ class AdbMainPanel(private val project: Project) : JPanel(BorderLayout(0, 10)) {
     private fun getSelectedDeviceId(): String? {
         val selectedDevice = deviceComboBox.selectedItem as? AdbDevice
         if (selectedDevice == null) {
-            setStatus("✕", "Please connect a device/emulator first.", JBColor.RED)
+            statusBadge.setStatus(StatusBadge.StatusType.ERROR, "✕ Please connect a device/emulator first")
             return null
         }
         return selectedDevice.id
@@ -261,7 +258,7 @@ class AdbMainPanel(private val project: Project) : JPanel(BorderLayout(0, 10)) {
     private fun getTargetPackageName(): String? {
         val pkg = packageNameField.text.trim()
         if (pkg.isBlank()) {
-            setStatus("✕", "Please enter or auto-detect a Package Name first.", JBColor.RED)
+            statusBadge.setStatus(StatusBadge.StatusType.ERROR, "✕ Please enter or detect a Package Name first")
             return null
         }
         return pkg
@@ -271,7 +268,7 @@ class AdbMainPanel(private val project: Project) : JPanel(BorderLayout(0, 10)) {
         val deviceId = getSelectedDeviceId() ?: return
         val packageName = getTargetPackageName() ?: return
 
-        setStatus("⏳", "Executing $title...", Color.GRAY)
+        statusBadge.setStatus(StatusBadge.StatusType.LOADING, "⏳ Executing $title...")
 
         ProgressManager.getInstance().run(object : Task.Backgroundable(project, title, false) {
             override fun run(indicator: ProgressIndicator) {
@@ -279,10 +276,10 @@ class AdbMainPanel(private val project: Project) : JPanel(BorderLayout(0, 10)) {
                 ApplicationManager.getApplication().invokeLater {
                     result.fold(
                         onSuccess = {
-                            setStatus("✓", "$title Successful!", JBColor.GREEN)
+                            statusBadge.setStatus(StatusBadge.StatusType.SUCCESS, "✓ $title Successful")
                         },
                         onFailure = { error ->
-                            setStatus("✕", "$title Failed: ${error.message}", JBColor.RED)
+                            statusBadge.setStatus(StatusBadge.StatusType.ERROR, "✕ $title Failed: ${error.message?.take(50)}")
                         }
                     )
                 }
@@ -293,7 +290,7 @@ class AdbMainPanel(private val project: Project) : JPanel(BorderLayout(0, 10)) {
     private fun runDeviceTask(title: String, action: (String) -> Result<String>) {
         val deviceId = getSelectedDeviceId() ?: return
 
-        setStatus("⏳", "Executing $title...", Color.GRAY)
+        statusBadge.setStatus(StatusBadge.StatusType.LOADING, "⏳ Executing $title...")
 
         ProgressManager.getInstance().run(object : Task.Backgroundable(project, title, false) {
             override fun run(indicator: ProgressIndicator) {
@@ -301,10 +298,10 @@ class AdbMainPanel(private val project: Project) : JPanel(BorderLayout(0, 10)) {
                 ApplicationManager.getApplication().invokeLater {
                     result.fold(
                         onSuccess = { msg ->
-                            setStatus("✓", "$title: $msg", JBColor.GREEN)
+                            statusBadge.setStatus(StatusBadge.StatusType.SUCCESS, "✓ $title: $msg")
                         },
                         onFailure = { error ->
-                            setStatus("✕", "$title Failed: ${error.message}", JBColor.RED)
+                            statusBadge.setStatus(StatusBadge.StatusType.ERROR, "✕ $title Failed: ${error.message?.take(50)}")
                         }
                     )
                 }
@@ -312,47 +309,181 @@ class AdbMainPanel(private val project: Project) : JPanel(BorderLayout(0, 10)) {
         })
     }
 
-    private fun setStatus(icon: String, message: String, color: Color) {
-        statusIconLabel.text = icon
-        statusTextLabel.text = message
-        statusTextLabel.foreground = color
-    }
-
-    private fun createStyledButton(text: String): JButton {
-        return JButton(text).apply {
-            font = font.deriveFont(Font.PLAIN, 12f)
-            margin = JBUI.insets(4, 8)
-        }
-    }
-
-    private fun createActionButton(text: String, isPrimary: Boolean = false): JButton {
-        return JButton(text).apply {
-            font = font.deriveFont(if (isPrimary) Font.BOLD else Font.PLAIN, 12f)
-            margin = JBUI.insets(6, 10)
-            isFocusable = false
-        }
-    }
-
     /**
-     * Custom rounded container panel matching IntelliJ IDE Dark and Light themes.
+     * Card container with subtle rounded border and IDE theme surface.
      */
-    private inner class RoundedPanel(
-        private val radius: Int = 12,
-        private val bgColor: Color = JBColor.namedColor("EditorPanel.background", JBColor(0xF5F5F5, 0x2B2D30))
-    ) : JPanel(BorderLayout()) {
+    private class SectionCard(title: String, content: JComponent) : JPanel(BorderLayout(0, 10)) {
         init {
             isOpaque = false
+            border = JBUI.Borders.empty(12, 14, 14, 14)
+
+            val titleLabel = JLabel(title).apply {
+                font = JBUI.Fonts.label(13f).deriveFont(Font.BOLD)
+                foreground = JBColor.namedColor("Label.foreground", JBColor(0x202124, 0xDFE1E5))
+            }
+
+            add(titleLabel, BorderLayout.NORTH)
+            add(content, BorderLayout.CENTER)
         }
 
         override fun paintComponent(g: Graphics) {
             val g2 = g.create() as Graphics2D
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+
+            val bgColor = JBColor.namedColor("Panel.background", JBColor(0xF6F7F9, 0x27292C))
+            val borderColor = JBColor(0xE0E2E7, 0x393C42)
+
             g2.color = bgColor
-            g2.fillRoundRect(0, 0, width, height, radius, radius)
-            g2.color = JBColor.border()
-            g2.drawRoundRect(0, 0, width - 1, height - 1, radius, radius)
+            g2.fillRoundRect(0, 0, width - 1, height - 1, 12, 12)
+
+            g2.color = borderColor
+            g2.stroke = BasicStroke(1f)
+            g2.drawRoundRect(0, 0, width - 1, height - 1, 12, 12)
+
+            g2.dispose()
+            super.paintComponent(g)
+        }
+    }
+
+    /**
+     * Modern rounded interactive button with hover states and crisp borders.
+     */
+    private class ModernButton(
+        text: String,
+        private val cornerRadius: Int = 8
+    ) : JButton(text) {
+        private var isHovered = false
+        private var isPressedState = false
+
+        init {
+            isContentAreaFilled = false
+            isFocusPainted = false
+            isBorderPainted = false
+            isOpaque = false
+            cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
+            font = JBUI.Fonts.label(12f).deriveFont(Font.PLAIN)
+            foreground = JBColor.namedColor("Button.foreground", JBColor(0x222222, 0xDFE1E5))
+            margin = JBUI.insets(6, 10)
+            preferredSize = Dimension(preferredSize.width, 38)
+            minimumSize = Dimension(40, 38)
+            maximumSize = Dimension(Int.MAX_VALUE, 38)
+
+            addMouseListener(object : MouseAdapter() {
+                override fun mouseEntered(e: MouseEvent?) {
+                    isHovered = true
+                    repaint()
+                }
+
+                override fun mouseExited(e: MouseEvent?) {
+                    isHovered = false
+                    repaint()
+                }
+
+                override fun mousePressed(e: MouseEvent?) {
+                    isPressedState = true
+                    repaint()
+                }
+
+                override fun mouseReleased(e: MouseEvent?) {
+                    isPressedState = false
+                    repaint()
+                }
+            })
+        }
+
+        override fun paintComponent(g: Graphics) {
+            val g2 = g.create() as Graphics2D
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+            g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
+
+            val bg = when {
+                !isEnabled -> JBColor(0xEEEEEE, 0x2A2C2F)
+                isPressedState -> JBColor(0xDFE1E5, 0x222426)
+                isHovered -> JBColor(0xEBEDF0, 0x3E4147)
+                else -> JBColor(0xFFFFFF, 0x32353A)
+            }
+
+            val border = when {
+                isHovered -> JBColor(0x9CA3AF, 0x5C616B)
+                else -> JBColor(0xD1D5DB, 0x3E4249)
+            }
+
+            // Background
+            g2.color = bg
+            g2.fillRoundRect(0, 0, width - 1, height - 1, cornerRadius, cornerRadius)
+
+            // Border
+            g2.color = border
+            g2.stroke = BasicStroke(1f)
+            g2.drawRoundRect(0, 0, width - 1, height - 1, cornerRadius, cornerRadius)
+
+            g2.dispose()
+            super.paintComponent(g)
+        }
+    }
+
+    /**
+     * Modern status badge pill with color themes.
+     */
+    private class StatusBadge : JPanel() {
+        enum class StatusType {
+            IDLE, SUCCESS, ERROR, LOADING
+        }
+
+        private val label = JLabel().apply {
+            font = JBUI.Fonts.label(12f).deriveFont(Font.BOLD)
+        }
+
+        private var currentType = StatusType.IDLE
+
+        init {
+            isOpaque = false
+            layout = FlowLayout(FlowLayout.LEFT, 10, 6)
+            border = JBUI.Borders.empty(0, 2)
+            add(label)
+            setStatus(StatusType.IDLE, "ℹ️ Ready")
+        }
+
+        fun setStatus(type: StatusType, message: String) {
+            currentType = type
+            label.text = message
+            label.foreground = when (type) {
+                StatusType.SUCCESS -> JBColor(0x137333, 0x5BB974)
+                StatusType.ERROR -> JBColor(0xC5221F, 0xF28B82)
+                StatusType.LOADING -> JBColor(0x1A73E8, 0x8AB4F8)
+                StatusType.IDLE -> JBColor(0x5F6368, 0x9AA0A6)
+            }
+            revalidate()
+            repaint()
+        }
+
+        override fun paintComponent(g: Graphics) {
+            val g2 = g.create() as Graphics2D
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+
+            val bgColor = when (currentType) {
+                StatusType.SUCCESS -> JBColor(0xE6F4EA, 0x1B3828)
+                StatusType.ERROR -> JBColor(0xFCE8E6, 0x3E2224)
+                StatusType.LOADING -> JBColor(0xE8F0FE, 0x1F2E45)
+                StatusType.IDLE -> JBColor(0xF1F3F4, 0x292B2E)
+            }
+            val borderColor = when (currentType) {
+                StatusType.SUCCESS -> JBColor(0xA8DAB5, 0x2D5A3C)
+                StatusType.ERROR -> JBColor(0xFAD2CF, 0x5C2B2E)
+                StatusType.LOADING -> JBColor(0xAECBFA, 0x2F4870)
+                StatusType.IDLE -> JBColor(0xDADCE0, 0x3C3F41)
+            }
+
+            g2.color = bgColor
+            g2.fillRoundRect(0, 0, width - 1, height - 1, 8, 8)
+
+            g2.color = borderColor
+            g2.stroke = BasicStroke(1f)
+            g2.drawRoundRect(0, 0, width - 1, height - 1, 8, 8)
+
             g2.dispose()
             super.paintComponent(g)
         }
     }
 }
+
