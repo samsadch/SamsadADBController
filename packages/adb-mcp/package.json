@@ -43,7 +43,7 @@
     "typecheck": "tsc -p ./ --noEmit",
     "watch": "tsc -p ./ --watch",
     "start": "node ./out/index.js",
-    "test": "node --test test/",
+    "test": "node --test test/*.test.mjs",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {

@@ -15,7 +15,7 @@
     "build": "tsc -p ./",
     "typecheck": "tsc -p ./ --noEmit",
     "watch": "tsc -p ./ --watch",
-    "test": "node --test test/",
+    "test": "node --test test/*.test.mjs",
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
