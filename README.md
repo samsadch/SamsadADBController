@@ -1,6 +1,6 @@
-# Samsad ADB Controller 🚀
+# ADB Controller by Samsad 🚀
 
-**Samsad ADB Controller** is a high-productivity, 100% offline control panel plugin for **Android Studio**, **IntelliJ IDEA**, and **Visual Studio Code**. It provides 1-click device management, app lifecycle controls, hardware navigation, power simulators, live SharedPreferences editing, and intent testers directly inside your IDE — with zero terminal commands, zero external APIs, and zero configuration.
+**ADB Controller by Samsad** is a high-productivity, 100% offline control panel plugin for **Android Studio**, **IntelliJ IDEA**, and **Visual Studio Code**. It provides 1-click device management, app lifecycle controls, hardware navigation, power simulators, live SharedPreferences editing, and intent testers directly inside your IDE — with zero terminal commands, zero external APIs, and zero configuration.
 
 ---
 

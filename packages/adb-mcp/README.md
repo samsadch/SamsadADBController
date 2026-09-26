@@ -42,13 +42,50 @@ Add to your `mcp_config.json` or MCP settings:
 }
 ```
 
-### 3. Run Locally from Source
+### 3. Android Studio (HTTP transport)
+
+Android Studio's Gemini integration connects only to a **streamable HTTP** endpoint — it
+cannot spawn a stdio process. Start the server in HTTP mode:
+
+```bash
+npx -y @samsadch/adb-mcp --http
+```
+
+Then go to **Settings → Tools → AI → MCP Servers**, enable MCP servers, and add:
+
+```json
+{
+  "mcpServers": {
+    "adb": {
+      "httpUrl": "http://127.0.0.1:3579/mcp"
+    }
+  }
+}
+```
+
+Type `/mcp` in the Gemini chat to confirm the tools loaded. `GET /healthz` reports status and
+the live session count if you need to debug the connection.
+
+> **The server binds to `127.0.0.1` only.** These tools run arbitrary shell commands on the
+> attached device and can read app databases, so exposing the port to a network would hand
+> that control to anyone who can reach it. Binding elsewhere requires an explicit
+> `--allow-external`, and the server prints a warning when you do.
+
+Options: `--port <n>` (default 3579), `--host <addr>` (default `127.0.0.1`),
+`--allow-external`, `--help`. The equivalents `ADB_MCP_TRANSPORT=http`, `ADB_MCP_PORT` and
+`ADB_MCP_HOST` work for clients that only let you set environment variables.
+
+Each HTTP session gets its own server instance, so the sticky target set by one client never
+leaks into another.
+
+### 4. Run Locally from Source
 ```bash
 git clone https://github.com/samsadch/SamsadADBController.git
 cd SamsadADBController
 npm install
 npm run build --workspace=@samsadch/adb-mcp
-node packages/adb-mcp/out/index.js
+node packages/adb-mcp/out/index.js          # stdio
+node packages/adb-mcp/out/index.js --http   # streamable HTTP
 ```
 
 ---

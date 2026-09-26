@@ -293,14 +293,33 @@ Zero-config VS Code registration is the highest-value packaging item: it turns "
 
 ## 8. Current Status & Next Steps
 
-**Status:** v1.1.0 shipped on both marketplaces. MCP server Phase 0 complete — 3 tools live,
-build and tests green, verified against real hardware.
+> ⚠️ **Sections 4–7 below are stale.** They describe the original Phase 0–7 plan. Phases 1–5
+> have since been built (51 tools) outside the sessions that maintain this file; the phase
+> tables have not been rewritten to match. Treat Section 8 as current.
 
-**Published 2026-09-24** under the `@samsadch` scope (the `samsad` npm org was unavailable):
+**Status:** v1.1.0 shipped on both marketplaces. MCP server at **51 tools**, published at
+`0.0.2`, with both stdio and streamable HTTP transports.
 
-- [`@samsadch/adb-core@0.0.1`](https://www.npmjs.com/package/@samsadch/adb-core)
-- [`@samsadch/adb-mcp@0.0.1`](https://www.npmjs.com/package/@samsadch/adb-mcp) — verified via
+**Published** under the `@samsadch` scope (the `samsad` npm org was unavailable):
+
+- [`@samsadch/adb-core`](https://www.npmjs.com/package/@samsadch/adb-core) — 0.0.1 on
+  2026-09-24, 0.0.2 on 2026-09-26
+- [`@samsadch/adb-mcp`](https://www.npmjs.com/package/@samsadch/adb-mcp) — verified via
   `npx -y @samsadch/adb-mcp` from a clean download
+
+**HTTP transport (2026-09-26).** Android Studio's Gemini integration accepts only an `httpUrl`
+and cannot spawn a stdio process, so the server gained a `--http` mode built on the SDK's
+`StreamableHTTPServerTransport`. stdio remains the default, so existing configs are unaffected.
+
+It binds to `127.0.0.1` only. These tools run arbitrary shell commands on the attached device
+and read app data, so a non-loopback bind requires an explicit `--allow-external` and prints a
+warning. DNS-rebinding protection is on, and each HTTP session gets its own server instance so
+one client's sticky target never leaks into another's — verified with two concurrent clients.
+
+**Lesson — CI runs a different Node than your laptop.** The publish workflow failed on
+`node --test test/`: Node 26 resolves a bare directory, Node 22 tries to `require()` it. An
+explicit glob (`test/*.test.mjs`) works on every version. Reproduce CI failures against the
+runner's Node version before guessing.
 
 **Lesson — `bin` paths must not start with `./`.** `npm publish` silently strips a `bin` entry
 whose path is `./out/index.js`, leaving an installable package with no executable. `npm pack`
@@ -308,17 +327,19 @@ does *not* apply this normalization, so `pack`-based checks pass. It was caught 
 the publish log was read in full. Always scan publish output for `npm warn publish` lines, and
 verify a release by installing the tarball and running `node_modules/.bin/<name>`.
 
-**v0.1 release target for the MCP server:** Phases 0 + 1 + 2 — 13 tools. That yields a server that can see the screen, drive the app, and explain a crash. Phases 3–7 are additive and none block release.
-
 **Immediate next steps:**
 
-1. Phase 1 — implement the eight Eyes & Hands tools, fixing Issue I1 as part of the screenshot rewrite.
-2. Phase 2 — implement the logcat ring buffer and crash extraction.
-3. Publish `@samsadch/adb-mcp` v0.1 and validate against Claude Code and Claude Desktop.
-4. Backport the configurable-timeout fix to the Kotlin `AdbExecutor`.
+1. Publish `0.0.3` (or `0.1.0`) carrying the HTTP transport, and verify it end to end from
+   Android Studio's MCP Servers panel.
+2. Rewrite Sections 4–7 to match the 51 tools that actually shipped.
+3. Backport the configurable-timeout fix to the Kotlin `AdbExecutor`.
+4. Publish the site's marketplace links once the VS Code and JetBrains listings are refreshed
+   for the MCP feature set.
 
 **Open questions:**
 
-- ~~npm scope availability~~ — `@samsad` and `samsad` both return 404 on the registry, so the scope is unclaimed. Publish prep is done (LICENSE, READMEs, `repository` metadata, `publishConfig.access: public`, `prepublishOnly`); `npm login` is the only remaining step.
-- Whether Phase 7's JetBrains bundling justifies shipping a Node runtime inside the plugin, or should just document the `npx` path.
+- Whether the JetBrains plugin should bundle a Node runtime to launch the server, or just
+  document the `npx` path.
 - Whether to add ESLint to the workspace; there is currently no linter on the TypeScript side.
+- Whether the npm description — which advertises databases, SharedPreferences, logcat and
+  screenshots — should be trimmed until every claim maps to a shipped tool.
