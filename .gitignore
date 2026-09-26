@@ -15,6 +15,7 @@ out/
 node_modules/
 dist/
 *.tsbuildinfo
+.claude/
 
 # OS / System
 .DS_Store

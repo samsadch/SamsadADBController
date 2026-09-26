@@ -265,14 +265,17 @@ Add to your `mcp_config.json`:
 }
 ```
 
-### 📋 MCP Toolset (37 Tools Available)
+### 📋 MCP Toolset (51 Tools Available)
 
 | Domain | Tools |
 | :--- | :--- |
-| **Discovery & Sticky Target** | `list_devices`, `set_target`, `get_device_info` |
-| **Eyes & Hands (UI & Input)** | `take_screenshot`, `dump_view_hierarchy`, `tap_element`, `tap_coordinates`, `input_text`, `press_key`, `swipe_screen`, `open_deep_link` |
-| **App Lifecycle & Permissions** | `install_app`, `uninstall_app`, `list_packages`, `start_app`, `stop_app`, `restart_app`, `clear_app_data`, `grant_permission`, `revoke_permission`, `get_app_info` |
-| **Database & SharedPreferences** | `list_databases`, `inspect_database_overview`, `list_database_tables`, `get_table_schema`, `get_table_data`, `create_database_table`, `query_database`, `delete_database_row`, `clear_database_table`, `export_database`, `list_shared_preferences`, `read_shared_preferences`, `get_shared_preference`, `set_shared_preference`, `delete_shared_preference`, `clear_shared_preferences` |
+| **Discovery & Sticky Target (3)** | `list_devices`, `set_target`, `get_device_info` |
+| **Eyes & Hands: UI & Input (8)** | `take_screenshot`, `dump_view_hierarchy`, `tap_element`, `tap_coordinates`, `input_text`, `press_key`, `swipe_screen`, `open_deep_link` |
+| **App Lifecycle & Permissions (10)** | `install_app`, `uninstall_app`, `list_packages`, `start_app`, `stop_app`, `restart_app`, `clear_app_data`, `grant_permission`, `revoke_permission`, `get_app_info` |
+| **Database & SharedPreferences (16)** | `list_databases`, `inspect_database_overview`, `list_database_tables`, `get_table_schema`, `get_table_data`, `create_database_table`, `query_database`, `delete_database_row`, `clear_database_table`, `export_database`, `list_shared_preferences`, `read_shared_preferences`, `get_shared_preference`, `set_shared_preference`, `delete_shared_preference`, `clear_shared_preferences` |
+| **Diagnostics & Memory (3)** | `get_logcat`, `clear_logcat`, `get_app_memory` |
+| **Device Controls & Power (8)** | `set_battery_level`, `unplug_battery`, `reset_battery`, `force_doze_mode`, `exit_doze_mode`, `toggle_dark_mode`, `toggle_animations`, `send_broadcast` |
+| **File Transfers & Shell (3)** | `push_file`, `pull_file`, `execute_shell_command` |
 
 See [packages/adb-mcp/README.md](packages/adb-mcp/README.md) for full MCP tool documentation.
 

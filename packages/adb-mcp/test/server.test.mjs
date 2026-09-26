@@ -52,10 +52,22 @@ test('createServer registers all Phase 0, Phase 1, Phase 2, and Phase 3 tools an
     'export_database',
     'list_shared_preferences',
     'read_shared_preferences',
-    'get_shared_preference',
-    'set_shared_preference',
-    'delete_shared_preference',
-    'clear_shared_preferences'
+    // Phase 4
+    'get_logcat',
+    'clear_logcat',
+    'get_app_memory',
+    'set_battery_level',
+    'unplug_battery',
+    'reset_battery',
+    'force_doze_mode',
+    'exit_doze_mode',
+    'toggle_dark_mode',
+    'toggle_animations',
+    'send_broadcast',
+    // Phase 5
+    'push_file',
+    'pull_file',
+    'execute_shell_command'
   ];
 
   for (const toolName of expectedTools) {
@@ -377,3 +389,145 @@ test('MCP Phase 3 Database & SharedPreferences tool handlers execute cleanly', a
   assert.equal(clearPrefsRes.isError, undefined);
   assert.match(clearPrefsRes.content[0].text, /Cleared all preferences/);
 });
+
+test('MCP Phase 4 & Phase 5 tool handlers execute cleanly', async () => {
+  const { server, target } = createServer();
+  const tools = server._registeredTools;
+
+  target.setDevice('emulator-5554');
+  target.setPackage('com.example.app');
+
+  const SAMPLE_LOGS = `09-26 12:00:01.123 1000 1234 I ActivityManager: Started activity\n09-26 12:00:02.456 1234 1234 D MyApp: Ready`;
+  const SAMPLE_MEM = `
+ Applications Memory Usage:
+ ** MEMINFO in pid 1234 [com.example.app] **
+ TOTAL PSS: 45000 TOTAL RSS: 60000
+ App Summary
+  Java Heap: 15000
+  Native Heap: 12000
+  TOTAL PSS: 45000 TOTAL RSS: 60000
+`;
+
+  target.adb.runner.run = async (_deviceId, args) => {
+    const cmd = args.join(' ');
+    if (cmd.includes('logcat -c')) {
+      return '';
+    }
+    if (cmd.includes('logcat -d')) {
+      return SAMPLE_LOGS;
+    }
+    if (cmd.includes('dumpsys meminfo')) {
+      return SAMPLE_MEM;
+    }
+    if (args[0] === 'push') {
+      return '1 file pushed. 1.2 MB/s';
+    }
+    if (args[0] === 'pull') {
+      return '1 file pulled. 0.8 MB/s';
+    }
+    if (cmd.includes('am broadcast')) {
+      return 'Broadcast completed';
+    }
+    if (args[0] === 'shell') {
+      return `output of ${args.slice(1).join(' ')}`;
+    }
+    return '';
+  };
+
+  target.adb.runner.runAdb = async (_deviceId, ...args) => {
+    return 'ok';
+  };
+
+  // Phase 4 tests
+  // 1. get_logcat
+  const logcatRes = await tools['get_logcat'].handler({ lineLimit: 50 });
+  assert.equal(logcatRes.isError, undefined);
+  const logcatJson = JSON.parse(logcatRes.content[0].text);
+  assert.equal(logcatJson.lines.length, 2);
+
+  // 2. clear_logcat
+  const clearLogRes = await tools['clear_logcat'].handler({});
+  assert.equal(clearLogRes.isError, undefined);
+  assert.match(clearLogRes.content[0].text, /cleared/i);
+
+  // 3. get_app_memory
+  const memRes = await tools['get_app_memory'].handler({});
+  assert.equal(memRes.isError, undefined);
+  const memJson = JSON.parse(memRes.content[0].text);
+  assert.equal(memJson.totalPssKb, 45000);
+
+  // 4. set_battery_level
+  const batLevelRes = await tools['set_battery_level'].handler({ level: 75 });
+  assert.equal(batLevelRes.isError, undefined);
+  assert.match(batLevelRes.content[0].text, /75%/);
+
+  // 5. unplug_battery
+  const batUnplugRes = await tools['unplug_battery'].handler({});
+  assert.equal(batUnplugRes.isError, undefined);
+  assert.match(batUnplugRes.content[0].text, /Unplugged/i);
+
+  // 6. reset_battery
+  const batResetRes = await tools['reset_battery'].handler({});
+  assert.equal(batResetRes.isError, undefined);
+  assert.match(batResetRes.content[0].text, /reset/i);
+
+  // 7. force_doze_mode
+  const dozeRes = await tools['force_doze_mode'].handler({});
+  assert.equal(dozeRes.isError, undefined);
+  assert.match(dozeRes.content[0].text, /Doze/i);
+
+  // 8. exit_doze_mode
+  const exitDozeRes = await tools['exit_doze_mode'].handler({});
+  assert.equal(exitDozeRes.isError, undefined);
+  assert.match(exitDozeRes.content[0].text, /exited/i);
+
+  // 9. toggle_dark_mode
+  const darkModeRes = await tools['toggle_dark_mode'].handler({ mode: 'dark' });
+  assert.equal(darkModeRes.isError, undefined);
+  assert.match(darkModeRes.content[0].text, /Dark Mode/i);
+
+  // 10. toggle_animations
+  const animRes = await tools['toggle_animations'].handler({ enabled: false });
+  assert.equal(animRes.isError, undefined);
+  assert.match(animRes.content[0].text, /Animations/i);
+
+  // 11. send_broadcast
+  const broadcastRes = await tools['send_broadcast'].handler({
+    action: 'com.example.TEST_ACTION',
+    extras: { count: 10, flag: true, name: 'adb' }
+  });
+  assert.equal(broadcastRes.isError, undefined);
+  assert.match(broadcastRes.content[0].text, /Broadcast Sent/i);
+
+  // Phase 5 tests
+  // 12. push_file
+  const tmpDir = mkdtempSync(join(tmpdir(), 'mcp-test-push-'));
+  const localSample = join(tmpDir, 'test.txt');
+  writeFileSync(localSample, 'mcp file content');
+
+  const pushRes = await tools['push_file'].handler({
+    localPath: localSample,
+    remotePath: '/sdcard/test.txt'
+  });
+  assert.equal(pushRes.isError, undefined);
+  assert.match(pushRes.content[0].text, /pushed/i);
+
+  // 13. pull_file
+  const localDest = join(tmpDir, 'downloaded.txt');
+  const pullRes = await tools['pull_file'].handler({
+    remotePath: '/sdcard/test.txt',
+    localPath: localDest
+  });
+  assert.equal(pullRes.isError, undefined);
+  assert.match(pullRes.content[0].text, /pulled/i);
+
+  // 14. execute_shell_command
+  const shellRes = await tools['execute_shell_command'].handler({
+    command: 'getprop ro.build.version.release'
+  });
+  assert.equal(shellRes.isError, undefined);
+  const shellJson = JSON.parse(shellRes.content[0].text);
+  assert.equal(shellJson.command, 'getprop ro.build.version.release');
+  assert.ok(shellJson.output.includes('output of getprop'));
+});
+

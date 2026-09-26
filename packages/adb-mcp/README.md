@@ -15,6 +15,9 @@ Part of [ADB Controller by Samsad](https://github.com/samsadch/SamsadADBControll
 * **Smart Touch & Gestures**: Tap by text, ID, or coordinates; swipe with auto-calculated screen geometry; dispatch hardware keycodes.
 * **App Lifecycle & Runtime Permissions**: Install APKs, clear caches, restart apps, grant/revoke permissions dynamically.
 * **Deep SQLite & SharedPreferences Inspection**: Query SQLite databases, browse tables, create tables, truncate, delete rows, and edit SharedPreferences XML with strict data typing.
+* **Non-blocking Logcat & Memory Diagnostics**: Real-time log capture with PID/tag/severity filters and `dumpsys meminfo` process allocation breakdowns.
+* **Hardware & Power Simulator**: Simulated battery levels, discharge states, Doze idle states, UI theme toggles, and broadcast intent injection.
+* **File Transfers & Shell Execution**: Push/pull files and directories, and execute ad-hoc device shell commands.
 
 ---
 
@@ -50,7 +53,7 @@ node packages/adb-mcp/out/index.js
 
 ---
 
-## 🛠️ Complete MCP Tool Catalog (37 Tools)
+## 🛠️ Complete MCP Tool Catalog (51 Tools)
 
 ### 1. Device Discovery & Sticky Target (3 Tools)
 | Tool | Description |
@@ -108,6 +111,32 @@ node packages/adb-mcp/out/index.js
 | `set_shared_preference` | Inserts or updates a preference key-value pair (`string`, `int`, `long`, `float`, `boolean`, `set`). |
 | `delete_shared_preference` | Removes a specific key from the preference XML file. |
 | `clear_shared_preferences` | Resets a preference file to an empty map (`<map></map>`). |
+
+### 6. Logs, Performance & System Diagnostics (3 Tools)
+| Tool | Description |
+| :--- | :--- |
+| `get_logcat` | Captures non-blocking Logcat buffer with PID filtering, severity thresholds (`V`, `D`, `I`, `W`, `E`, `F`), tag filtering, search queries, and line limits. |
+| `clear_logcat` | Clears the circular Logcat buffer on the device. |
+| `get_app_memory` | Inspects process memory consumption using `dumpsys meminfo` (Total PSS/RSS in MB, Java Heap, Native Heap, Graphics, Code, Stack). |
+
+### 7. Device Controls & Power Simulator (8 Tools)
+| Tool | Description |
+| :--- | :--- |
+| `set_battery_level` | Simulates a specific battery level percentage (0-100) and unplugs device power. |
+| `unplug_battery` | Simulates disconnecting device from AC/USB charger (sets battery state to discharging). |
+| `reset_battery` | Restores battery status to actual physical hardware state. |
+| `force_doze_mode` | Forces device into deep Doze mode (idle state) for testing background tasks and battery optimizations. |
+| `exit_doze_mode` | Wakes device from Doze mode (unforce). |
+| `toggle_dark_mode` | Switches system UI theme between Dark Mode and Light Mode, or sets an explicit mode (`light`, `dark`, `toggle`). |
+| `toggle_animations` | Enables or disables system animations (window, transition, and animator scales) or toggles between 1.0x and 0.0x. |
+| `send_broadcast` | Sends custom broadcast intent with action, package, component, and typed extras dictionary. |
+
+### 8. File Transfers & Safe Ad-hoc Shell (3 Tools)
+| Tool | Description |
+| :--- | :--- |
+| `push_file` | Transfers a local file or directory from the host machine to the Android device. |
+| `pull_file` | Transfers a file or directory from the Android device to the host machine. |
+| `execute_shell_command` | Executes an arbitrary ADB shell command on the target device and returns standard output. |
 
 ---
 

@@ -11,6 +11,9 @@ import { registerNavigationTools } from './tools/navigation.js';
 import { registerAppTools } from './tools/apps.js';
 import { registerDatabaseTools } from './tools/database.js';
 import { registerSharedPreferencesTools } from './tools/sharedPreferences.js';
+import { registerDiagnosticsTools } from './tools/diagnostics.js';
+import { registerDeviceControlTools } from './tools/deviceControls.js';
+import { registerSystemTools } from './tools/system.js';
 
 // Read from package.json rather than a literal, so the version reported over MCP can never
 // drift from the published one. package.json is always present in the tarball.
@@ -45,6 +48,9 @@ export function createServer(config: AdbConfig = {}): { server: McpServer; targe
   registerAppTools(server, target);
   registerDatabaseTools(server, target);
   registerSharedPreferencesTools(server, target);
+  registerDiagnosticsTools(server, target);
+  registerDeviceControlTools(server, target);
+  registerSystemTools(server, target);
 
   return { server, target };
 }

@@ -2,7 +2,9 @@ import * as apps from './apps';
 import * as controls from './deviceControls';
 import { DatabaseService } from './databaseService';
 import { getDeviceInfo, listDevices } from './devices';
+import * as diagnostics from './diagnostics';
 import { AdbRunner } from './exec';
+import * as files from './files';
 import { getCandidateAdbPaths } from './adbPath';
 import { autoDetectPackage } from './packageDetect';
 import { captureScreenshot } from './screenshot';
@@ -78,9 +80,9 @@ export class AdbExecutor {
   // --- device controls ------------------------------------------------------------------
 
   public isNightMode(d: string) { return controls.isNightMode(this.runner, d); }
-  public toggleDarkMode(d: string) { return controls.toggleDarkMode(this.runner, d); }
+  public toggleDarkMode(d: string, mode?: 'light' | 'dark' | 'toggle') { return controls.toggleDarkMode(this.runner, d, mode); }
   public toggleLayoutBounds(d: string) { return controls.toggleLayoutBounds(this.runner, d); }
-  public toggleAnimations(d: string) { return controls.toggleAnimations(this.runner, d); }
+  public toggleAnimations(d: string, enabled?: boolean) { return controls.toggleAnimations(this.runner, d, enabled); }
   public setBatteryLevel(d: string, level: number) { return controls.setBatteryLevel(this.runner, d, level); }
   public unplugBattery(d: string) { return controls.unplugBattery(this.runner, d); }
   public resetBattery(d: string) { return controls.resetBattery(this.runner, d); }
@@ -93,8 +95,36 @@ export class AdbExecutor {
     return controls.sendDeepLink(this.runner, d, url, pkg);
   }
 
-  public sendBroadcast(d: string, action: string, key?: string, val?: string, pkg?: string) {
-    return controls.sendBroadcast(this.runner, d, action, key, val, pkg);
+  public sendBroadcast(d: string, actionOrOptions: string | controls.BroadcastOptions, key?: string, val?: string, pkg?: string) {
+    return controls.sendBroadcast(this.runner, d, actionOrOptions, key, val, pkg);
+  }
+
+  // --- diagnostics ----------------------------------------------------------------------
+
+  public getLogcat(d: string, options?: diagnostics.LogcatOptions) {
+    return diagnostics.getLogcat(this.runner, d, options);
+  }
+
+  public clearLogcat(d: string) {
+    return diagnostics.clearLogcat(this.runner, d);
+  }
+
+  public getAppMemory(d: string, pkg: string) {
+    return diagnostics.getAppMemory(this.runner, d, pkg);
+  }
+
+  // --- file transfers & shell -----------------------------------------------------------
+
+  public pushFile(d: string, localPath: string, remotePath: string, options?: { timeoutMs?: number }) {
+    return files.pushFile(this.runner, d, localPath, remotePath, options);
+  }
+
+  public pullFile(d: string, remotePath: string, localPath: string, options?: { timeoutMs?: number }) {
+    return files.pullFile(this.runner, d, remotePath, localPath, options);
+  }
+
+  public executeShellCommand(d: string, command: string, options?: { timeoutMs?: number; maxBuffer?: number }) {
+    return files.executeShellCommand(this.runner, d, command, options);
   }
 
   // --- storage --------------------------------------------------------------------------

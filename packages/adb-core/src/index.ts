@@ -52,6 +52,22 @@ export {
 } from './apps';
 export { openDeepLink } from './navigation';
 export {
+  isNightMode,
+  toggleDarkMode,
+  toggleLayoutBounds,
+  toggleAnimations,
+  setBatteryLevel,
+  unplugBattery,
+  resetBattery,
+  forceDozeMode,
+  exitDozeMode,
+  setAppInactive,
+  sendKeyEvent,
+  sendDeepLink,
+  sendBroadcast,
+  type BroadcastOptions
+} from './deviceControls';
+export {
   type ColumnInfo,
   type TableOverview,
   type ColumnDefinition,
@@ -76,13 +92,28 @@ export {
   type PrefType,
   type PrefEntry
 } from './storage';
+export {
+  getLogcat,
+  clearLogcat,
+  getAppMemory,
+  getPackagePid,
+  type LogLevel,
+  type LogcatOptions,
+  type LogcatResult,
+  type MemoryInfo
+} from './diagnostics';
+export {
+  pushFile,
+  pullFile,
+  executeShellCommand,
+  type ShellCommandResult
+} from './files';
 export * as apps from './apps';
 export * as controls from './deviceControls';
 export * as storage from './storage';
 export * as input from './input';
 export * as uiHierarchy from './uiHierarchy';
 export * as navigation from './navigation';
+export * as diagnostics from './diagnostics';
+export * as files from './files';
 export { AdbExecutor } from './adbExecutor';
-
-
-
