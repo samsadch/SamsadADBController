@@ -1,0 +1,20 @@
+{
+  "name": "samsad-adb-controller",
+  "private": true,
+  "version": "1.1.0",
+  "description": "Monorepo root for ADB Controller: shared core, MCP server, and the VS Code extension.",
+  "license": "MIT",
+  "workspaces": [
+    "packages/*",
+    "vscode-extension"
+  ],
+  "scripts": {
+    "build": "npm run build -w @samsadch/adb-core && npm run build -w @samsadch/adb-mcp && npm run build -w adb-controller-by-samsad",
+    "typecheck": "npm run build -w @samsadch/adb-core && npm run typecheck --workspaces --if-present",
+    "clean": "rm -rf packages/*/out packages/*/dist vscode-extension/out",
+    "test": "npm run build -w @samsadch/adb-core && npm run test -w @samsadch/adb-core"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // node16 (not the base's classic "node") so TypeScript honours the MCP SDK's exports map.
+    // Emitted output stays CommonJS because this package declares no "type": "module".
+    "module": "node16",
+    "moduleResolution": "node16",
+    "outDir": "out",
+    "rootDir": "src"
+  },
+  // No project reference: build order is sequenced by the root "build" script, which compiles
+  // adb-core first so its .d.ts files exist here.
+  "include": ["src/**/*.ts"]
+}

@@ -1,0 +1,19 @@
+# Smithery configuration for @samsadch/adb-mcp
+# https://smithery.ai/docs/config
+
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties:
+      adbPath:
+        type: string
+        description: "Explicit path to the adb binary (optional)"
+      androidHome:
+        type: string
+        description: "Path to Android SDK directory (optional)"
+  commandFunction:
+    name: "npx"
+    args:
+      - "-y"
+      - "@samsadch/adb-mcp"

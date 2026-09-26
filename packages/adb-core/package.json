@@ -1,0 +1,41 @@
+{
+  "name": "@samsadch/adb-core",
+  "version": "0.0.2",
+  "description": "Shared ADB capability layer for the ADB Controller VS Code extension and MCP server.",
+  "license": "MIT",
+  "main": "./out/index.js",
+  "types": "./out/index.d.ts",
+  "files": [
+    "out",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p ./",
+    "typecheck": "tsc -p ./ --noEmit",
+    "watch": "tsc -p ./ --watch",
+    "test": "node --test test/",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/samsadch/SamsadADBController.git",
+    "directory": "packages/adb-core"
+  },
+  "homepage": "https://github.com/samsadch/SamsadADBController/tree/main/packages/adb-core#readme",
+  "bugs": {
+    "url": "https://github.com/samsadch/SamsadADBController/issues"
+  },
+  "author": "Samsad Chalil Valappil",
+  "publishConfig": {
+    "access": "public"
+  }
+}

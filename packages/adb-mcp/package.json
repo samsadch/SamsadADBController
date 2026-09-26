@@ -1,0 +1,74 @@
+{
+  "name": "@samsadch/adb-mcp",
+  "version": "0.0.2",
+  "description": "Model Context Protocol (MCP) server for Android ADB: inspect databases, capture screenshots, manage apps, edit SharedPreferences, and control devices with AI agents in Antigravity, Claude, Cursor, and Windsurf.",
+  "license": "MIT",
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "modelcontextprotocol",
+    "ai",
+    "agent",
+    "ai-agent",
+    "antigravity",
+    "claude",
+    "claude-mcp",
+    "cursor",
+    "windsurf",
+    "adb",
+    "android",
+    "android-debug-bridge",
+    "emulator",
+    "device-control",
+    "sqlite",
+    "sharedpreferences",
+    "logcat",
+    "screenshot",
+    "mobile-testing"
+  ],
+  "type": "module",
+  "main": "./out/index.js",
+  "bin": {
+    "adb-mcp": "out/index.js"
+  },
+  "files": [
+    "out",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p ./",
+    "typecheck": "tsc -p ./ --noEmit",
+    "watch": "tsc -p ./ --watch",
+    "start": "node ./out/index.js",
+    "test": "node --test test/",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.1",
+    "@samsadch/adb-core": "0.0.2",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/samsadch/SamsadADBController.git",
+    "directory": "packages/adb-mcp"
+  },
+  "homepage": "https://github.com/samsadch/SamsadADBController/tree/main/packages/adb-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/samsadch/SamsadADBController/issues"
+  },
+  "author": "Samsad Chalil Valappil",
+  "publishConfig": {
+    "access": "public"
+  }
+}
