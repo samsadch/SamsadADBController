@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Samsad ADB Controller & MCP Server 🚀 — Modern Android Suite for Developers & AI Agents</title>
+  <meta name="description" content="100% offline, high-productivity control panel for Android Studio & VS Code, and a 51-tool Model Context Protocol (MCP) server for AI coding agents (Antigravity, Claude Code, Cursor, Windsurf)." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0e17;
+      --bg-secondary: #111827;
+      --bg-card: rgba(17, 24, 39, 0.75);
+      --bg-card-hover: rgba(31, 41, 55, 0.85);
+      --border-color: rgba(75, 85, 99, 0.35);
+      --border-glow: rgba(59, 130, 246, 0.4);
+      --text-primary: #f9fafb;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+      --accent-green: #10b981;
+      --accent-blue: #3b82f6;
+      --accent-purple: #8b5cf6;
+      --accent-cyan: #06b6d4;
+      --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #06b6d4 100%);
+      --card-radius: 16px;
+      --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Ambient Glow Background */
+    .ambient-glow {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+      background: 
+        radial-gradient(circle at 20% 15%, rgba(59, 130, 246, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 80% 30%, rgba(139, 92, 246, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 50% 80%, rgba(6, 182, 212, 0.1) 0%, transparent 50%);
+    }
+
+    /* Navigation */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(16px);
+      background: rgba(10, 14, 23, 0.8);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .nav-container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+
+    .brand-badge {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 9999px;
+      background: rgba(59, 130, 246, 0.2);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      font-weight: 600;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.75rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--text-primary);
+    }
+
+    .github-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-primary);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .github-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: var(--text-secondary);
+      transform: translateY(-1px);
+    }
+
+    /* Container */
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 5rem 0 3.5rem;
+      text-align: center;
+      position: relative;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 1rem;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      border-radius: 9999px;
+      color: var(--accent-green);
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-title {
+      font-size: 3.5rem;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.25rem;
+    }
+
+    .gradient-text {
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: var(--text-secondary);
+      max-width: 780px;
+      margin: 0 auto 2.5rem;
+      font-weight: 400;
+    }
+
+    .hero-actions {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 3.5rem;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 1.75rem;
+      background: var(--accent-gradient);
+      color: #fff;
+      font-weight: 600;
+      font-size: 1rem;
+      border-radius: 10px;
+      text-decoration: none;
+      box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+      transition: all 0.2s ease;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px -5px rgba(59, 130, 246, 0.6);
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 1.75rem;
+      background: rgba(31, 41, 55, 0.7);
+      color: var(--text-primary);
+      font-weight: 600;
+      font-size: 1rem;
+      border-radius: 10px;
+      text-decoration: none;
+      border: 1px solid var(--border-color);
+      transition: all 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(55, 65, 81, 0.8);
+      border-color: var(--text-secondary);
+      transform: translateY(-2px);
+    }
+
+    /* Stats Banner */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 4.5rem;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--card-radius);
+      padding: 1.5rem;
+      text-align: center;
+      backdrop-filter: blur(12px);
+    }
+
+    .stat-num {
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: var(--accent-cyan);
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    /* Section Styling */
+    .section-title-wrap {
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+
+    .section-tag {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent-blue);
+      margin-bottom: 0.5rem;
+    }
+
+    .section-title {
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.75rem;
+    }
+
+    .section-desc {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    /* Feature Pillars Grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 5rem;
+    }
+
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--card-radius);
+      padding: 2rem;
+      backdrop-filter: blur(12px);
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card:hover {
+      border-color: var(--border-glow);
+      background: var(--bg-card-hover);
+      transform: translateY(-4px);
+    }
+
+    .feature-icon {
+      font-size: 2rem;
+      margin-bottom: 1.25rem;
+      display: inline-block;
+    }
+
+    .feature-card h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: var(--text-primary);
+    }
+
+    .feature-card p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+
+    /* Interactive Live Sandbox Demo */
+    .sandbox-container {
+      background: #0d121d;
+      border: 1px solid var(--border-color);
+      border-radius: var(--card-radius);
+      padding: 2rem;
+      margin-bottom: 5rem;
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    @media (max-width: 900px) {
+      .sandbox-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .phone-mockup {
+      background: #030712;
+      border: 3px solid #374151;
+      border-radius: 36px;
+      padding: 1.25rem;
+      max-width: 340px;
+      margin: 0 auto;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    }
+
+    .phone-screen {
+      background: #111827;
+      border-radius: 24px;
+      padding: 1.25rem 1rem;
+      min-height: 440px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 1px solid #1f2937;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .phone-screen.light-theme {
+      background: #f3f4f6;
+      color: #111827;
+      border-color: #e5e7eb;
+    }
+
+    .phone-screen.light-theme .phone-header,
+    .phone-screen.light-theme .phone-card {
+      color: #111827;
+      background: #ffffff;
+      border-color: #d1d5db;
+    }
+
+    .phone-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .phone-card {
+      background: rgba(31, 41, 55, 0.8);
+      border: 1px solid rgba(75, 85, 99, 0.4);
+      border-radius: 12px;
+      padding: 1rem;
+      margin: 0.75rem 0;
+      font-size: 0.85rem;
+    }
+
+    .phone-nav-bar {
+      display: flex;
+      justify-content: space-around;
+      padding-top: 0.75rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .phone-nav-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.25rem;
+      cursor: pointer;
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .phone-nav-btn:hover {
+      color: var(--accent-cyan);
+      background: rgba(255, 255, 255, 0.1);
+      transform: scale(1.15);
+    }
+
+    .sandbox-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .control-group {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.25rem;
+    }
+
+    .control-group h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .tool-btn {
+      background: #1f2937;
+      border: 1px solid #374151;
+      color: var(--text-primary);
+      padding: 0.5rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tool-btn:hover {
+      background: var(--accent-blue);
+      border-color: var(--accent-blue);
+      transform: translateY(-1px);
+    }
+
+    .terminal-output {
+      background: #000;
+      border: 1px solid #1f2937;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: #34d399;
+      height: 90px;
+      overflow-y: auto;
+    }
+
+    /* 51 MCP Tools Catalog Section */
+    .tools-section {
+      margin-bottom: 5rem;
+    }
+
+    .tools-filter-bar {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+      justify-content: center;
+    }
+
+    .filter-tab {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 0.6rem 1.1rem;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .filter-tab.active,
+    .filter-tab:hover {
+      background: var(--accent-blue);
+      color: #fff;
+      border-color: var(--accent-blue);
+    }
+
+    .search-box-wrap {
+      max-width: 500px;
+      margin: 0 auto 2.5rem;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.85rem 1.25rem 0.85rem 2.75rem;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      color: #fff;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent-blue);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .tools-catalog-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+
+    .tool-item-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.25rem;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .tool-item-card:hover {
+      border-color: var(--accent-cyan);
+      transform: translateY(-2px);
+    }
+
+    .tool-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    .tool-name {
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--accent-cyan);
+    }
+
+    .tool-badge {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      background: rgba(139, 92, 246, 0.2);
+      color: #c4b5fd;
+      font-weight: 600;
+    }
+
+    .tool-desc {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    /* Integration / Quick Start Tabs */
+    .integration-section {
+      margin-bottom: 5rem;
+    }
+
+    .code-tabs-container {
+      background: #090d16;
+      border: 1px solid var(--border-color);
+      border-radius: var(--card-radius);
+      overflow: hidden;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .code-tabs-header {
+      display: flex;
+      background: #111827;
+      border-bottom: 1px solid var(--border-color);
+      overflow-x: auto;
+    }
+
+    .code-tab-btn {
+      padding: 0.85rem 1.5rem;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .code-tab-btn.active {
+      color: #fff;
+      border-bottom-color: var(--accent-blue);
+      background: rgba(59, 130, 246, 0.08);
+    }
+
+    .code-tab-content {
+      padding: 1.5rem;
+      position: relative;
+    }
+
+    .code-block {
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: #e2e8f0;
+      overflow-x: auto;
+      background: transparent;
+      margin: 0;
+    }
+
+    .copy-code-btn {
+      position: absolute;
+      top: 1.25rem;
+      right: 1.25rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 0.4rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .copy-code-btn:hover {
+      color: #fff;
+      background: var(--accent-blue);
+    }
+
+    /* IDE Showcase Preview Image */
+    .screenshot-section {
+      text-align: center;
+      margin-bottom: 5rem;
+    }
+
+    .screenshot-frame {
+      max-width: 980px;
+      margin: 0 auto;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8);
+      background: #111827;
+    }
+
+    .screenshot-frame img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding: 3rem 0;
+      background: #070a10;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    footer a {
+      color: var(--accent-cyan);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 2.5rem;
+      }
+      .nav-links {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="ambient-glow"></div>
+
+  <!-- Navbar -->
+  <nav>
+    <div class="nav-container">
+      <a href="#" class="brand">
+        <span>🤖📱 Samsad ADB Controller</span>
+        <span class="brand-badge">v1.1.0 & MCP</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#demo">Live Sandbox</a></li>
+        <li><a href="#tools">51 MCP Tools</a></li>
+        <li><a href="#quickstart">Quick Start</a></li>
+        <li>
+          <a href="https://github.com/samsadch/SamsadADBController" target="_blank" rel="noopener" class="github-btn">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+            GitHub
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="hero container">
+    <div class="hero-badge">
+      <span>⚡ 100% Offline &amp; Local Bridge — Zero Cloud Relay</span>
+    </div>
+    <h1 class="hero-title">
+      Supercharge Android Dev &amp; <br />
+      <span class="gradient-text">Empower AI Coding Agents</span>
+    </h1>
+    <p class="hero-subtitle">
+      The all-in-one productivity control panel for <strong>Android Studio, IntelliJ IDEA &amp; VS Code</strong>, backed by a complete <strong>51-Tool Model Context Protocol (MCP) Server</strong> for Google Antigravity, Claude Code, Cursor, and Windsurf.
+    </p>
+
+    <div class="hero-actions">
+      <a href="#tools" class="btn-primary">
+        <span>Explore 51 MCP Tools</span>
+        <span>→</span>
+      </a>
+      <a href="#quickstart" class="btn-secondary">
+        <span>Get Started</span>
+      </a>
+      <a href="https://github.com/samsadch/SamsadADBController" target="_blank" rel="noopener" class="btn-secondary">
+        <span>⭐ Star on GitHub</span>
+      </a>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-num">51</div>
+        <div class="stat-label">Model Context Protocol (MCP) Tools</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">100%</div>
+        <div class="stat-label">Offline &amp; Zero Telemetry</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">1-Click</div>
+        <div class="stat-label">Device Control &amp; Power Simulators</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">Dual IDE</div>
+        <div class="stat-label">Android Studio / IntelliJ &amp; VS Code</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Feature Pillars -->
+  <section class="container" id="features">
+    <div class="section-title-wrap">
+      <div class="section-tag">Core Capabilities</div>
+      <h2 class="section-title">Engineered for Humans &amp; Autonomous Agents</h2>
+      <p class="section-desc">From daily IDE workflow shortcuts to autonomous multimodal agent debugging, everything is unified through a shared high-performance engine.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🤖</div>
+        <h3>51-Tool AI Agent MCP Server</h3>
+        <p>Give Google Antigravity, Claude Code, Cursor, and Windsurf full vision (multimodal screenshots), precise gestures (tap, swipe), SQLite querying, and memory profiling.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📝</div>
+        <h3>Live SharedPreferences &amp; DB Inspector</h3>
+        <p>Inspect, add, modify, and delete SharedPreferences XML entries and SQLite table rows on-device in real-time with typed validation and zero data loss.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>1-Click App Lifecycle &amp; Permissions</h3>
+        <p>Instant soft restart, clear cache/data, clean reinstall, and toggle runtime permissions (`CAMERA`, `LOCATION`, `NOTIFICATIONS`) dynamically.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🔋</div>
+        <h3>Hardware &amp; Power Simulator</h3>
+        <p>Simulate critical battery levels (5%, 20%, 50%, 100%), AC unplugging (discharging state), and force deep Doze mode (`force-idle`) to verify background jobs.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Non-blocking Logcat &amp; Memory Telemetry</h3>
+        <p>Stream filtered Logcat logs with PID/tag/severity filters without hanging, and parse full `dumpsys meminfo` heap and RSS breakdowns.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🚀</div>
+        <h3>Deep Links &amp; Intent Tester</h3>
+        <p>Dispatch custom URI schemes, Android App Links, and broadcast intents with typed extra parameters in a single click.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Sandbox Demo -->
+  <section class="container" id="demo">
+    <div class="section-title-wrap">
+      <div class="section-tag">Interactive Sandbox</div>
+      <h2 class="section-title">Test the Controls in Real-Time</h2>
+      <p class="section-desc">Simulate device interactions below to see how Samsad ADB Controller triggers commands and telemetry.</p>
+    </div>
+
+    <div class="sandbox-container">
+      <!-- Phone Mockup -->
+      <div class="phone-mockup">
+        <div class="phone-screen" id="simScreen">
+          <div>
+            <div class="phone-header">
+              <span id="simClock">12:30</span>
+              <span id="simBatteryStatus">🔋 100%</span>
+            </div>
+            <div class="phone-card">
+              <strong>App:</strong> com.example.demo<br/>
+              <strong>Status:</strong> <span style="color:#10b981;">Running (Foreground)</span><br/>
+              <strong>Mode:</strong> <span id="simModeText">Dark Mode</span>
+            </div>
+            <div class="phone-card" style="font-family: var(--font-mono); font-size: 0.75rem;">
+              <strong>SharedPreferences:</strong><br/>
+              auth_token: <span style="color:#38bdf8;">"usr_9812_xyz"</span><br/>
+              is_beta: <span style="color:#f59e0b;">true</span>
+            </div>
+          </div>
+          <div class="phone-nav-bar">
+            <button class="phone-nav-btn" onclick="simTrigger('input keyevent 4', '◀ KEYCODE_BACK Dispatched')">◀</button>
+            <button class="phone-nav-btn" onclick="simTrigger('input keyevent 3', '⏺ KEYCODE_HOME Dispatched')">⏺</button>
+            <button class="phone-nav-btn" onclick="simTrigger('input keyevent 187', '⏹ KEYCODE_APP_SWITCH Dispatched')">⏹</button>
+            <button class="phone-nav-btn" onclick="simTrigger('input keyevent 26', '🔒 KEYCODE_POWER (Lock/Wake)')">🔒</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls Sandbox -->
+      <div class="sandbox-controls">
+        <div class="control-group">
+          <h4>🌗 Display &amp; Visuals</h4>
+          <div class="btn-row">
+            <button class="tool-btn" onclick="toggleSimTheme()">Toggle Dark Mode</button>
+            <button class="tool-btn" onclick="simTrigger('settings put global window_animation_scale 0.0', '⚡ Animations Set to 0.0x (Instant UI)')">Toggle Animations</button>
+            <button class="tool-btn" onclick="simTrigger('screencap -p > /tmp/snap.png', '📸 Screenshot captured to Clipboard')">📸 Take Screenshot</button>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <h4>🔋 Battery &amp; Doze Simulator</h4>
+          <div class="btn-row">
+            <button class="tool-btn" onclick="setSimBattery(5)">🪫 5% (Critical)</button>
+            <button class="tool-btn" onclick="setSimBattery(20)">🔋 20% (Low)</button>
+            <button class="tool-btn" onclick="setSimBattery(100)">⚡ 100% (Full)</button>
+            <button class="tool-btn" onclick="simTrigger('dumpsys deviceidle force-idle', '💤 Entered Doze Mode (Deep Idle)')">💤 Force Doze</button>
+            <button class="tool-btn" onclick="simTrigger('dumpsys deviceidle unforce', '☀️ Exited Doze Mode')">☀️ Exit Doze</button>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <h4>📟 ADB Terminal Output</h4>
+          <div class="terminal-output" id="simLog">
+            $ adb ready on localhost:5037<br/>
+            &gt; Click any control button to test simulated ADB executions...
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 51 Tools Catalog -->
+  <section class="container tools-section" id="tools">
+    <div class="section-title-wrap">
+      <div class="section-tag">Complete Reference</div>
+      <h2 class="section-title">51 MCP Tools for AI Agents</h2>
+      <p class="section-desc">Every tool is typed, normalized, and integrated with automatic sticky target resolution.</p>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="tools-filter-bar">
+      <button class="filter-tab active" onclick="filterTools('all')">All (51)</button>
+      <button class="filter-tab" onclick="filterTools('discovery')">Discovery (3)</button>
+      <button class="filter-tab" onclick="filterTools('vision')">Eyes &amp; Hands (8)</button>
+      <button class="filter-tab" onclick="filterTools('lifecycle')">App Lifecycle (10)</button>
+      <button class="filter-tab" onclick="filterTools('db')">Databases &amp; Prefs (16)</button>
+      <button class="filter-tab" onclick="filterTools('diagnostics')">Diagnostics &amp; Power (11)</button>
+      <button class="filter-tab" onclick="filterTools('system')">Files &amp; Shell (3)</button>
+    </div>
+
+    <!-- Search Input -->
+    <div class="search-box-wrap">
+      <svg class="search-icon" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+      <input type="text" id="toolSearch" class="search-input" placeholder="Search tool by name or keyword (e.g., screenshot, sqlite, battery, tap)..." oninput="searchTools()" />
+    </div>
+
+    <!-- Tool Items Grid -->
+    <div class="tools-catalog-grid" id="toolsGrid">
+      <!-- Tools will be dynamically populated / filtered by JS -->
+    </div>
+  </section>
+
+  <!-- IDE Screenshot Preview -->
+  <section class="container screenshot-section">
+    <div class="section-title-wrap">
+      <div class="section-tag">IDE Control Panel</div>
+      <h2 class="section-title">Native Tool Window Integration</h2>
+      <p class="section-desc">Designed with high-density icons, virtual hardware navigation strips, and live tables.</p>
+    </div>
+
+    <div class="screenshot-frame">
+      <img src="images/preview.jpg" alt="Samsad ADB Controller IDE Plugin Interface Preview" loading="lazy" />
+    </div>
+  </section>
+
+  <!-- Quick Start & Code Snippets -->
+  <section class="container integration-section" id="quickstart">
+    <div class="section-title-wrap">
+      <div class="section-tag">Get Started in Seconds</div>
+      <h2 class="section-title">Connect to Your Favorite Tools</h2>
+      <p class="section-desc">Run the MCP server instantly with npx or install the IDE extension.</p>
+    </div>
+
+    <div class="code-tabs-container">
+      <div class="code-tabs-header">
+        <button class="code-tab-btn active" onclick="switchCodeTab(0)">Claude Code</button>
+        <button class="code-tab-btn" onclick="switchCodeTab(1)">Antigravity / Cursor / Windsurf</button>
+        <button class="code-tab-btn" onclick="switchCodeTab(2)">VS Code Extension</button>
+        <button class="code-tab-btn" onclick="switchCodeTab(3)">Android Studio / IntelliJ</button>
+      </div>
+      <div class="code-tab-content">
+        <button class="copy-code-btn" onclick="copyActiveCode()">Copy</button>
+        <pre class="code-block" id="activeCodeBlock">claude mcp add adb -- npx -y @samsadch/adb-mcp</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p style="margin-bottom: 0.5rem; font-weight: 600; color: #f9fafb;">
+        Samsad ADB Controller &amp; MCP Server
+      </p>
+      <p style="margin-bottom: 1rem;">
+        Crafted with ❤️ by <a href="https://github.com/samsadch" target="_blank" rel="noopener">Samsad Chalil Valappil</a>. Open-sourced under the MIT License.
+      </p>
+      <p>
+        <a href="https://github.com/samsadch/SamsadADBController" target="_blank" rel="noopener">GitHub Repository</a> • 
+        <a href="https://github.com/samsadch/SamsadADBController/issues" target="_blank" rel="noopener">Issue Tracker</a> • 
+        <a href="https://www.npmjs.com/package/@samsadch/adb-mcp" target="_blank" rel="noopener">NPM Package</a>
+      </p>
+    </div>
+  </footer>
+
+  <!-- Interactive Scripts -->
+  <script>
+    // 51 Tools Data
+    const TOOLS_DATA = [
+      // Discovery
+      { name: "list_devices", cat: "discovery", badge: "Discovery", desc: "Lists connected physical devices and emulators with serial, model, and state." },
+      { name: "set_target", cat: "discovery", badge: "Discovery", desc: "Pins active target device and Android package for subsequent tool calls." },
+      { name: "get_device_info", cat: "discovery", badge: "Discovery", desc: "Retrieves OS version, SDK level, display resolution, density, and battery status." },
+
+      // Vision & Hands
+      { name: "take_screenshot", cat: "vision", badge: "Eyes", desc: "Captures a live device screenshot as a multimodal PNG image for AI vision." },
+      { name: "dump_view_hierarchy", cat: "vision", badge: "Eyes", desc: "Dumps structured on-screen UI hierarchy JSON with bounding boxes and click states." },
+      { name: "tap_element", cat: "vision", badge: "Hands", desc: "Finds UI element by text, resource-id, or content-desc and taps its center." },
+      { name: "tap_coordinates", cat: "vision", badge: "Hands", desc: "Performs precision touch event at explicit (x, y) pixel coordinates." },
+      { name: "input_text", cat: "vision", badge: "Hands", desc: "Types text into active input field with automated shell and space escaping." },
+      { name: "press_key", cat: "vision", badge: "Hands", desc: "Dispatches navigation/hardware keys (BACK, HOME, RECENTS, ENTER, POWER, VOL)." },
+      { name: "swipe_screen", cat: "vision", badge: "Hands", desc: "Swipes by direction (up, down, left, right) or explicit start/end coordinates." },
+      { name: "open_deep_link", cat: "vision", badge: "Hands", desc: "Dispatches Android VIEW Intents with URI schemes and App Links." },
+
+      // App Lifecycle
+      { name: "install_app", cat: "lifecycle", badge: "App", desc: "Installs an APK from the host filesystem with -g runtime permission flags." },
+      { name: "uninstall_app", cat: "lifecycle", badge: "App", desc: "Uninstalls an application with optional user data retention (-k)." },
+      { name: "list_packages", cat: "lifecycle", badge: "App", desc: "Lists installed packages filtered by third_party, system, enabled, or disabled." },
+      { name: "start_app", cat: "lifecycle", badge: "App", desc: "Launches main activity or specific Component class with optional cold restart." },
+      { name: "stop_app", cat: "lifecycle", badge: "App", desc: "Force-stops the target application process (am force-stop)." },
+      { name: "restart_app", cat: "lifecycle", badge: "App", desc: "Atomically force-stops and relaunches the target application." },
+      { name: "clear_app_data", cat: "lifecycle", badge: "App", desc: "Resets application user data, databases, and cache (pm clear)." },
+      { name: "grant_permission", cat: "lifecycle", badge: "App", desc: "Dynamically grants runtime permissions (e.g. CAMERA, POST_NOTIFICATIONS)." },
+      { name: "revoke_permission", cat: "lifecycle", badge: "App", desc: "Revokes granted runtime permissions from the application." },
+      { name: "get_app_info", cat: "lifecycle", badge: "App", desc: "Inspects version name, version code, target SDK, and requested permissions." },
+
+      // Databases & Prefs
+      { name: "list_databases", cat: "db", badge: "Database", desc: "Discovers all SQLite database files in /data/data/<pkg>/databases/." },
+      { name: "inspect_database_overview", cat: "db", badge: "Database", desc: "Generates an inventory table of all tables with row counts and column counts." },
+      { name: "list_database_tables", cat: "db", badge: "Database", desc: "Lists all table names inside the specified SQLite database." },
+      { name: "get_table_schema", cat: "db", badge: "Database", desc: "Inspects column names, data types, nullability, default values, and primary keys." },
+      { name: "get_table_data", cat: "db", badge: "Database", desc: "Browses and paginates table rows with sorting and total row count." },
+      { name: "create_database_table", cat: "db", badge: "Database", desc: "Creates a new SQLite table with structured column definitions or raw SQL." },
+      { name: "query_database", cat: "db", badge: "Database", desc: "Executes arbitrary SQL queries (SELECT, INSERT, UPDATE, DELETE) with JSON results." },
+      { name: "delete_database_row", cat: "db", badge: "Database", desc: "Deletes specific row(s) matching a WHERE condition (e.g. id = 42)." },
+      { name: "clear_database_table", cat: "db", badge: "Database", desc: "Wipes all records from a table and resets auto-increment sequence counters." },
+      { name: "export_database", cat: "db", badge: "Database", desc: "Pulls database file and merged WAL journals to local host path." },
+      { name: "list_shared_preferences", cat: "db", badge: "Storage", desc: "Discovers all .xml preference files in /data/data/<pkg>/shared_prefs/." },
+      { name: "read_shared_preferences", cat: "db", badge: "Storage", desc: "Reads all stored key-value pairs with exact data types." },
+      { name: "get_shared_preference", cat: "db", badge: "Storage", desc: "Fetches a single key's value and explicit data type." },
+      { name: "set_shared_preference", cat: "db", badge: "Storage", desc: "Inserts or updates a preference key-value pair (string, int, long, float, boolean, set)." },
+      { name: "delete_shared_preference", cat: "db", badge: "Storage", desc: "Removes a specific key from the preference XML file." },
+      { name: "clear_shared_preferences", cat: "db", badge: "Storage", desc: "Resets a preference file to an empty map (<map></map>)." },
+
+      // Diagnostics & Power
+      { name: "get_logcat", cat: "diagnostics", badge: "Diagnostics", desc: "Captures non-blocking Logcat buffer with PID filtering, severity, tag, and search." },
+      { name: "clear_logcat", cat: "diagnostics", badge: "Diagnostics", desc: "Clears the circular Logcat buffer on the device." },
+      { name: "get_app_memory", cat: "diagnostics", badge: "Diagnostics", desc: "Inspects process memory allocation using dumpsys meminfo (PSS/RSS in MB)." },
+      { name: "set_battery_level", cat: "diagnostics", badge: "Power", desc: "Simulates battery level percentage (0-100) and unplugs device from power." },
+      { name: "unplug_battery", cat: "diagnostics", badge: "Power", desc: "Simulates disconnecting charger (sets battery state to discharging)." },
+      { name: "reset_battery", cat: "diagnostics", badge: "Power", desc: "Restores battery reporting to actual physical hardware state." },
+      { name: "force_doze_mode", cat: "diagnostics", badge: "Power", desc: "Forces device into deep Doze mode (idle state) for background job testing." },
+      { name: "exit_doze_mode", cat: "diagnostics", badge: "Power", desc: "Wakes device from Doze mode (unforce)." },
+      { name: "toggle_dark_mode", cat: "diagnostics", badge: "Controls", desc: "Switches system UI theme between Dark Mode and Light Mode." },
+      { name: "toggle_animations", cat: "diagnostics", badge: "Controls", desc: "Enables or disables system UI animations (1.0x / 0.0x)." },
+      { name: "send_broadcast", cat: "diagnostics", badge: "Controls", desc: "Sends custom Android broadcast intent with action and typed extras map." },
+
+      // Files & Shell
+      { name: "push_file", cat: "system", badge: "System", desc: "Transfers local file or directory from host machine to device path." },
+      { name: "pull_file", cat: "system", badge: "System", desc: "Transfers file or directory from Android device to host machine." },
+      { name: "execute_shell_command", cat: "system", badge: "System", desc: "Executes arbitrary ADB shell commands and returns standard output." }
+    ];
+
+    let currentCat = "all";
+    let searchQuery = "";
+
+    function renderTools() {
+      const grid = document.getElementById("toolsGrid");
+      grid.innerHTML = "";
+
+      const filtered = TOOLS_DATA.filter(t => {
+        const matchesCat = (currentCat === "all") || (t.cat === currentCat);
+        const matchesQuery = !searchQuery || 
+          t.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+          t.desc.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          t.badge.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesCat && matchesQuery;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 2rem; color: var(--text-muted);">No tools found matching "${searchQuery}".</div>`;
+        return;
+      }
+
+      filtered.forEach(t => {
+        const card = document.createElement("div");
+        card.className = "tool-item-card";
+        card.innerHTML = `
+          <div>
+            <div class="tool-header">
+              <span class="tool-name">${t.name}</span>
+              <span class="tool-badge">${t.badge}</span>
+            </div>
+            <p class="tool-desc">${t.desc}</p>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function filterTools(cat) {
+      currentCat = cat;
+      document.querySelectorAll(".filter-tab").forEach(btn => {
+        btn.classList.remove("active");
+      });
+      event.target.classList.add("active");
+      renderTools();
+    }
+
+    function searchTools() {
+      searchQuery = document.getElementById("toolSearch").value.trim();
+      renderTools();
+    }
+
+    // Code Tabs
+    const CODE_SNIPPETS = [
+      `claude mcp add adb -- npx -y @samsadch/adb-mcp`,
+      `{\n  "mcpServers": {\n    "adb": {\n      "command": "npx",\n      "args": ["-y", "@samsadch/adb-mcp"]\n    }\n  }\n}`,
+      `# In VS Code Extensions: search "ADB Controller by Samsad" or install VSIX\ncode --install-extension adb-controller-by-samsad-1.0.0.vsix`,
+      `# Clone and build local Android Studio plugin\ngit clone https://github.com/samsadch/SamsadADBController.git\ncd SamsadADBController && ./gradlew buildPlugin`
+    ];
+
+    let activeTabIdx = 0;
+
+    function switchCodeTab(idx) {
+      activeTabIdx = idx;
+      document.querySelectorAll(".code-tab-btn").forEach((btn, i) => {
+        btn.classList.toggle("active", i === idx);
+      });
+      document.getElementById("activeCodeBlock").innerText = CODE_SNIPPETS[idx];
+    }
+
+    function copyActiveCode() {
+      const text = CODE_SNIPPETS[activeTabIdx];
+      navigator.clipboard.writeText(text);
+      const btn = document.querySelector(".copy-code-btn");
+      btn.innerText = "Copied!";
+      setTimeout(() => { btn.innerText = "Copy"; }, 2000);
+    }
+
+    // Sandbox Simulator
+    function simTrigger(cmd, label) {
+      const log = document.getElementById("simLog");
+      const timestamp = new Date().toLocaleTimeString();
+      log.innerHTML += `<br/>[${timestamp}] $ adb ${cmd}<br/><span style="color:#6ee7b7;">✔ ${label}</span>`;
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function toggleSimTheme() {
+      const screen = document.getElementById("simScreen");
+      const isLight = screen.classList.toggle("light-theme");
+      document.getElementById("simModeText").innerText = isLight ? "Light Mode" : "Dark Mode";
+      simTrigger("cmd uimode night " + (isLight ? "no" : "yes"), `Theme switched to ${isLight ? "Light" : "Dark"} Mode`);
+    }
+
+    function setSimBattery(level) {
+      document.getElementById("simBatteryStatus").innerText = (level <= 20 ? "🪫 " : "🔋 ") + level + "%";
+      simTrigger(`dumpsys battery set level ${level}`, `Battery simulated at ${level}%`);
+    }
+
+    // Initialize
+    renderTools();
+  </script>
+</body>
+</html>
