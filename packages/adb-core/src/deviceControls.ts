@@ -7,8 +7,19 @@ export async function isNightMode(runner: AdbRunner, deviceId: string): Promise<
   return current.toLowerCase().includes('yes');
 }
 
-export async function toggleDarkMode(runner: AdbRunner, deviceId: string): Promise<string> {
-  const target = (await isNightMode(runner, deviceId)) ? 'no' : 'yes';
+export async function toggleDarkMode(
+  runner: AdbRunner,
+  deviceId: string,
+  mode?: 'light' | 'dark' | 'toggle'
+): Promise<string> {
+  let target: 'yes' | 'no';
+  if (mode === 'dark') {
+    target = 'yes';
+  } else if (mode === 'light') {
+    target = 'no';
+  } else {
+    target = (await isNightMode(runner, deviceId)) ? 'no' : 'yes';
+  }
   await runner.runAdb(deviceId, 'shell', 'cmd', 'uimode', 'night', target);
   return target === 'yes' ? 'Dark Mode set to ON' : 'Dark Mode set to OFF';
 }
@@ -22,11 +33,22 @@ export async function toggleLayoutBounds(runner: AdbRunner, deviceId: string): P
   return `Layout bounds set to ${newVal}`;
 }
 
-export async function toggleAnimations(runner: AdbRunner, deviceId: string): Promise<string> {
-  const current = await runner
-    .runAdb(deviceId, 'shell', 'settings', 'get', 'global', 'window_animation_scale')
-    .catch(() => '1.0');
-  const newScale = current.trim() === '0' || current.trim() === '0.0' ? '1.0' : '0.0';
+export async function toggleAnimations(
+  runner: AdbRunner,
+  deviceId: string,
+  enabled?: boolean
+): Promise<string> {
+  let newScale: string;
+  if (enabled === true) {
+    newScale = '1.0';
+  } else if (enabled === false) {
+    newScale = '0.0';
+  } else {
+    const current = await runner
+      .runAdb(deviceId, 'shell', 'settings', 'get', 'global', 'window_animation_scale')
+      .catch(() => '1.0');
+    newScale = current.trim() === '0' || current.trim() === '0.0' ? '1.0' : '0.0';
+  }
   for (const key of ['window_animation_scale', 'transition_animation_scale', 'animator_duration_scale']) {
     await runner.runAdb(deviceId, 'shell', 'settings', 'put', 'global', key, newScale);
   }
@@ -90,17 +112,56 @@ export async function sendDeepLink(
   return `Dispatched Deep Link: ${url}`;
 }
 
+export interface BroadcastOptions {
+  action: string;
+  pkg?: string;
+  component?: string;
+  extras?: Record<string, string | number | boolean>;
+}
+
 export async function sendBroadcast(
-  runner: AdbRunner, deviceId: string, action: string,
-  extraKey?: string, extraVal?: string, pkg?: string
+  runner: AdbRunner,
+  deviceId: string,
+  actionOrOptions: string | BroadcastOptions,
+  extraKey?: string,
+  extraVal?: string,
+  pkg?: string
 ): Promise<string> {
-  const args = ['shell', 'am', 'broadcast', '-a', action];
-  if (extraKey && extraVal) {
+  if (typeof actionOrOptions === 'object' && actionOrOptions !== null) {
+    const opts = actionOrOptions;
+    const args = ['shell', 'am', 'broadcast', '-a', opts.action];
+    if (opts.pkg) {
+      args.push('-p', opts.pkg);
+    }
+    if (opts.component) {
+      args.push('-n', opts.component);
+    }
+    if (opts.extras) {
+      for (const [key, val] of Object.entries(opts.extras)) {
+        if (typeof val === 'boolean') {
+          args.push('--ez', key, String(val));
+        } else if (typeof val === 'number') {
+          if (Number.isInteger(val)) {
+            args.push('--ei', key, String(val));
+          } else {
+            args.push('--ef', key, String(val));
+          }
+        } else {
+          args.push('--es', key, String(val));
+        }
+      }
+    }
+    await runner.run(deviceId, args);
+    return `Broadcast Sent: ${opts.action}`;
+  }
+
+  const args = ['shell', 'am', 'broadcast', '-a', actionOrOptions];
+  if (extraKey && extraVal !== undefined) {
     args.push('--es', extraKey, extraVal);
   }
   if (pkg) {
     args.push(pkg);
   }
   await runner.run(deviceId, args);
-  return `Broadcast Sent: ${action}`;
+  return `Broadcast Sent: ${actionOrOptions}`;
 }
