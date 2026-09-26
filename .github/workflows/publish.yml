@@ -39,12 +39,22 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Publish @samsadch/adb-core
-        run: npm publish ./packages/adb-core --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Publish @samsadch/adb-mcp
-        run: npm publish ./packages/adb-mcp --access public
+      # Publishes in dependency order and skips any version already on the registry.
+      # Without the skip, a run where only one package changed fails with
+      # "E403 cannot publish over the previously published versions" and never
+      # reaches the package that actually needs releasing.
+      - name: Publish changed packages
+        run: |
+          set -euo pipefail
+          for pkg in packages/adb-core packages/adb-mcp; do
+            name=$(node -p "require('./$pkg/package.json').name")
+            version=$(node -p "require('./$pkg/package.json').version")
+            if npm view "$name@$version" version >/dev/null 2>&1; then
+              echo "Skipping $name@$version — already published."
+            else
+              echo "Publishing $name@$version"
+              npm publish "./$pkg"
+            fi
+          done
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

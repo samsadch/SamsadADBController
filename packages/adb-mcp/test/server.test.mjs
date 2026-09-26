@@ -3,11 +3,16 @@ import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
+import { readFileSync } from 'node:fs';
 import { createServer, SERVER_VERSION, SERVER_NAME } from '../out/server.js';
 
-test('createServer registers all Phase 0, Phase 1, Phase 2, and Phase 3 tools and matches version 0.0.2', () => {
+const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+
+test('createServer registers all Phase 0, Phase 1, Phase 2, and Phase 3 tools and reports the package version', () => {
   assert.equal(SERVER_NAME, 'adb-mcp');
-  assert.equal(SERVER_VERSION, '0.0.2');
+  // Compared against package.json rather than a literal, so a version bump cannot
+  // silently break this test or let the reported version drift from the published one.
+  assert.equal(SERVER_VERSION, pkg.version);
 
   const { server, target } = createServer();
   assert.ok(server);
