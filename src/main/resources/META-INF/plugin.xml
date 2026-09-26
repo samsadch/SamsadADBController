@@ -1,19 +1,88 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
     <id>com.samsad.adbcontroller</id>
-    <name>Samsad ADB Controller</name>
+    <name>ADB Controller by Samsad</name>
     <vendor email="support@example.com" url="https://example.com">Samsad Development</vendor>
 
     <description><![CDATA[
-    Fast, offline ADB control panel for Android Studio & IntelliJ IDEA.<br>
-    Features:
-    <ul>
-        <li><b>Connected Device Manager</b>: Auto-detects connected emulators & physical devices.</li>
-        <li><b>App Actions Grid</b>: 1-click <i>Clear App Data</i>, <i>Force Restart</i>, <i>Force Stop</i>, and <i>Uninstall</i>.</li>
-        <li><b>Device Utilities Grid</b>: 1-click <i>Toggle Dark Mode</i>, <i>Toggle Layout Bounds</i>, <i>Toggle Animations</i>, and <i>Screenshot to Clipboard</i>.</li>
-        <li><b>Auto Package Detection</b>: Detects app applicationId / namespace from project files automatically.</li>
-    </ul>
+ADB Controller by Samsad brings essential Android device management, debug tools, power simulators, live SharedPreferences editor, and SQLite Database Inspector directly into your IDE sidebar. No terminal typing, no external dependencies, and 100% offline.
+
+<h3>Feature Guide &amp; How to Use</h3>
+
+<h4>1. Target Device &amp; Package Selection</h4>
+<ul>
+  <li><b>Select Device:</b> Choose any connected physical device or emulator from the top dropdown. Supports USB and Wireless Debugging.</li>
+  <li><b>Auto-Detect Package:</b> Click <b>Auto Detect</b> to scan build files, or select from installed debuggable packages.</li>
+</ul>
+
+<h4>2. Virtual Hardware Navigation Bar</h4>
+<ul>
+  <li><b>Back:</b> Dispatches system back key (Keycode 4).</li>
+  <li><b>Home:</b> Returns to device home launcher (Keycode 3).</li>
+  <li><b>Recent Apps:</b> Opens app switcher (Keycode 187).</li>
+  <li><b>Lock / Wake:</b> Toggles screen power state (Keycode 26).</li>
+  <li><b>Volume:</b> Adjusts media volume down (Keycode 25) or up (Keycode 24).</li>
+</ul>
+
+<h4>3. App Management</h4>
+<ul>
+  <li><b>Restart App:</b> Force-stops and re-launches the main launcher activity.</li>
+  <li><b>Clear App Data:</b> Resets app cache, local storage, and database state.</li>
+  <li><b>Clear &amp; Restart:</b> Clears all app storage and immediately relaunches the app in a clean state.</li>
+  <li><b>Force Stop:</b> Instantly terminates all foreground and background processes.</li>
+  <li><b>Uninstall App:</b> Completely removes the package build from the target device.</li>
+  <li><b>App Info:</b> Directly opens Android System Settings for the app.</li>
+</ul>
+
+<h4>4. Device Quick Tools</h4>
+<ul>
+  <li><b>Screenshot to Clipboard:</b> Captures the device screen and copies the PNG directly to your OS clipboard.</li>
+  <li><b>Toggle Dark Mode:</b> Instantly toggles between Day and Night UI modes.</li>
+  <li><b>Toggle Layout Bounds:</b> Shows/hides visual clip bounds, margins, and padding boxes.</li>
+  <li><b>Toggle Animations:</b> Toggles window, transition, and animator durations between 0.0x and 1.0x.</li>
+</ul>
+
+<h4>5. Battery &amp; Doze Simulator</h4>
+<ul>
+  <li><b>Quick Presets (5%, 20%, 50%, 100%):</b> Simulate critical, low, half, or full battery levels.</li>
+  <li><b>Unplug (Discharge):</b> Sets battery status to discharging while staying connected over USB.</li>
+  <li><b>Reset Battery:</b> Restores device battery charging and level to real physical hardware defaults.</li>
+  <li><b>Enter Doze (Idle):</b> Forces Android DeviceIdle mode to test background jobs and alarms.</li>
+  <li><b>Exit Doze:</b> Wakes the device from Doze mode and processes queued tasks.</li>
+  <li><b>App Standby:</b> Puts your package into App Standby bucket.</li>
+</ul>
+
+<h4>6. Live SharedPreferences &amp; SQLite Database Inspector</h4>
+<ul>
+  <li><b>SharedPreferences Live Editor:</b> View, edit, add, and delete XML preferences live on-device with in-memory app sync.</li>
+  <li><b>Database Live Inspector &amp; Query Simulator:</b> Live table viewer, inline cell editing, insert/delete rows, and SQL query console with 1-click Save &amp; Restart.</li>
+  <li><b>Export SQLite DBs &amp; Prefs:</b> Pulls all databases and XML preferences into your workspace project.</li>
+</ul>
+
+<h4>7. Deep Link &amp; URL Tester</h4>
+<ul>
+  <li>Enter any custom scheme (e.g. <code>myapp://checkout?id=101</code>) or web link and dispatch instantly.</li>
+</ul>
+
+<h4>8. Broadcast &amp; Intent Tester</h4>
+<ul>
+  <li>Enter the broadcast action and optional extra parameters in <code>key=value</code> format to trigger receivers.</li>
+</ul>
+
+<hr/>
+<p><i>Note: SharedPreferences Live Editor, Database Inspector, and DB Export require the app to be a debuggable build (<code>debuggable true</code>), utilizing standard Android <code>run-as</code> permissions.</i></p>
     ]]></description>
+
+    <change-notes><![CDATA[
+    <h3>v1.1.0</h3>
+    <ul>
+      <li><b>SQLite Database Live Inspector & SQL Query Simulator:</b> Live table browser, inline cell editing, insert/delete rows, arbitrary SQL query console (Ctrl/Cmd+Enter), and 1-click Save & Restart.</li>
+      <li><b>Embedded SQLite Engine:</b> Direct WAL checkpointing and host-side SQLite execution supporting Android 10, 11, 12, 13, 14, and 15 without requiring on-device sqlite3 binary.</li>
+      <li><b>Live SharedPreferences XML Editor:</b> View, add, delete, and modify key-value pairs live on-device with in-memory app sync.</li>
+      <li><b>Battery & Doze Simulator:</b> Level presets (5%, 20%, 50%, 100%), AC/USB discharge, Doze Mode idle/unidle triggers, and App Standby.</li>
+      <li><b>Enhanced Device Auto-Discovery:</b> Multi-candidate ADB runner with support for USB and Wireless Debugging.</li>
+    </ul>
+    ]]></change-notes>
 
     <!-- Dependencies -->
     <depends>com.intellij.modules.platform</depends>
@@ -22,11 +91,11 @@
         <!-- Persistent Application Services -->
         <applicationService serviceImplementation="com.samsad.adb.services.AdbExecutor"/>
 
-        <!-- Tool Window registered on the right sidebar -->
+        <!-- Tool Window registered on the left sidebar -->
         <toolWindow
-                id="Samsad ADB"
-                anchor="right"
+                id="ADB Controller by Samsad"
+                anchor="left"
                 factoryClass="com.samsad.adb.ui.AdbToolWindowFactory"
-                icon="AllIcons.Actions.Lighting"/>
+                icon="com.samsad.adb.ui.AdbIcons.TOOL_WINDOW"/>
     </extensions>
 </idea-plugin>

@@ -1,0 +1,131 @@
+{
+  "name": "adb-controller-by-samsad",
+  "displayName": "ADB Controller by Samsad",
+  "description": "Fast, 100% offline ADB controls: app management, live SharedPreferences editor, battery/doze simulator, virtual nav, deep links, and device tools.",
+  "version": "1.1.0",
+  "publisher": "SamsadChalilValappil",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/samsadch/SamsadADBController.git"
+  },
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other",
+    "Debuggers"
+  ],
+  "keywords": [
+    "adb",
+    "android",
+    "emulator",
+    "device",
+    "sharedpreferences",
+    "battery-simulator",
+    "doze",
+    "deep-link",
+    "broadcast",
+    "restart",
+    "clear-data"
+  ],
+  "icon": "resources/icon.png",
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onView:samsadAdbView"
+  ],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "samsad-adb-container",
+          "title": "ADB Controller by Samsad",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "samsad-adb-container": [
+        {
+          "type": "webview",
+          "id": "samsadAdbView",
+          "name": "ADB Controller by Samsad"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "samsad-adb.refreshDevices",
+        "title": "Samsad ADB: Refresh Connected Devices"
+      },
+      {
+        "command": "samsad-adb.restartApp",
+        "title": "Samsad ADB: Restart App"
+      },
+      {
+        "command": "samsad-adb.clearAppData",
+        "title": "Samsad ADB: Clear App Data"
+      },
+      {
+        "command": "samsad-adb.clearAndRestartApp",
+        "title": "Samsad ADB: Clear App Data & Restart"
+      },
+      {
+        "command": "samsad-adb.forceStopApp",
+        "title": "Samsad ADB: Force Stop App"
+      },
+      {
+        "command": "samsad-adb.screenshot",
+        "title": "Samsad ADB: Screenshot to Clipboard"
+      },
+      {
+        "command": "samsad-adb.toggleDarkMode",
+        "title": "Samsad ADB: Toggle Dark Mode"
+      },
+      {
+        "command": "samsad-adb.toggleLayoutBounds",
+        "title": "Samsad ADB: Toggle Layout Bounds"
+      },
+      {
+        "command": "samsad-adb.toggleAnimations",
+        "title": "Samsad ADB: Toggle Animations"
+      }
+    ],
+    "configuration": {
+      "title": "ADB Controller by Samsad",
+      "properties": {
+        "samsadAdb.adbPath": {
+          "type": "string",
+          "default": "",
+          "description": "Custom path to the ADB executable (e.g., /Users/samsad/Library/Android/sdk/platform-tools/adb or /opt/homebrew/bin/adb). Leave empty for auto-detection."
+        },
+        "samsadAdb.androidSdkPath": {
+          "type": "string",
+          "default": "",
+          "description": "Custom path to Android SDK directory. Leave empty for auto-detection."
+        },
+        "samsadAdb.sqlitePath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the sqlite3 executable used by the Database Inspector. Android no longer ships sqlite3 on device, so databases are copied to this machine and queried locally. Leave empty for auto-detection."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
+    "watch": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --watch",
+    "compile": "tsc -p ./",
+    "package": "vsce package",
+    "typecheck": "tsc -p ./ --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.74.0",
+    "esbuild": "^0.20.2",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@samsadch/adb-core": "*"
+  }
+}

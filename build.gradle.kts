@@ -23,6 +23,7 @@ dependencies {
 
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("org.json:json:20240303")
+    implementation("org.xerial:sqlite-jdbc:3.45.1.0")
 }
 
 kotlin {

@@ -11,6 +11,11 @@ out/
 *.iws
 .navigation/
 
+# Node / npm workspaces
+node_modules/
+dist/
+*.tsbuildinfo
+
 # OS / System
 .DS_Store
 Thumbs.db

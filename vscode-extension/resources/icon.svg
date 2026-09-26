@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <!-- Device Frame -->
+  <rect x="2.5" y="1" width="11" height="14" rx="2" fill="none" stroke="#6C707E" stroke-width="1.3"/>
+  <!-- Top notch -->
+  <line x1="6.5" y1="2.6" x2="9.5" y2="2.6" stroke="#6C707E" stroke-width="1" stroke-linecap="round"/>
+  <!-- Central ADB Flash / Fast Connector -->
+  <path d="M8.8 4.5 L5.5 8.5 L8.2 8.5 L7.2 12.5 L11.2 7.8 L8.5 7.8 Z" fill="#3574F0"/>
+  <!-- Bottom bar/dot -->
+  <circle cx="8" cy="13.5" r="0.6" fill="#6C707E"/>
+</svg>

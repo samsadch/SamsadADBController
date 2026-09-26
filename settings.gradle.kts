@@ -5,4 +5,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = "SamsadADBController"
+rootProject.name = "ADBControllerBySamsad"
