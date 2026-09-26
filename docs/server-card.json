@@ -1,0 +1,36 @@
+{
+  "$schema": "https://smithery.ai/docs/config#schema",
+  "name": "@samsadch/adb-mcp",
+  "version": "0.0.2",
+  "description": "51-tool Model Context Protocol (MCP) server for Android ADB: inspect databases, capture screenshots, manage apps, edit SharedPreferences, and control devices with AI agents.",
+  "repository": "https://github.com/samsadch/SamsadADBController",
+  "license": "MIT",
+  "author": "Samsad Chalil Valappil",
+  "homepage": "https://samsadch.github.io/SamsadADBController/",
+  "command": {
+    "type": "stdio",
+    "command": "npx",
+    "args": [
+      "-y",
+      "@samsadch/adb-mcp"
+    ]
+  },
+  "capabilities": {
+    "tools": true,
+    "resources": false,
+    "prompts": false
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "adbPath": {
+        "type": "string",
+        "description": "Explicit path to the adb binary (optional)"
+      },
+      "androidHome": {
+        "type": "string",
+        "description": "Path to Android SDK directory (optional)"
+      }
+    }
+  }
+}
