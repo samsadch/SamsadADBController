@@ -8,8 +8,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <!-- JetBrains Marketplace Widget Script -->
-  <script src="https://plugins.jetbrains.com/assets/scripts/mp-widget.js"></script>
   <style>
     :root {
       --bg-primary: #0a0e17;
@@ -73,37 +71,56 @@
     .nav-container {
       max-width: 1240px;
       margin: 0 auto;
-      padding: 1rem 1.5rem;
+      padding: 0.85rem 1.5rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 1rem;
     }
 
+    /* The brand never wraps; pieces drop out at breakpoints instead. */
     .brand {
       display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      font-size: 1.25rem;
+      align-items: baseline;
+      gap: 0.5rem;
+      font-size: 1.1rem;
       font-weight: 700;
       color: var(--text-primary);
       text-decoration: none;
+      white-space: nowrap;
+      flex-shrink: 0;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      font-size: 1.15rem;
+      line-height: 1;
+    }
+
+    .brand-sub {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-secondary);
     }
 
     .brand-badge {
-      font-size: 0.75rem;
-      padding: 0.2rem 0.5rem;
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
       border-radius: 9999px;
       background: rgba(59, 130, 246, 0.2);
       color: var(--accent-cyan);
       border: 1px solid rgba(59, 130, 246, 0.4);
       font-weight: 600;
+      white-space: nowrap;
     }
 
     .nav-links {
       display: flex;
       align-items: center;
-      gap: 1.5rem;
+      gap: 1.15rem;
       list-style: none;
+      white-space: nowrap;
+      min-width: 0;
     }
 
     .nav-links a {
@@ -121,12 +138,14 @@
     .nav-actions {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.5rem;
+      flex-shrink: 0;
     }
 
     .nav-btn {
       display: inline-flex;
       align-items: center;
+      white-space: nowrap;
       gap: 0.4rem;
       padding: 0.45rem 0.85rem;
       border-radius: 8px;
@@ -390,14 +409,6 @@
       transition: all 0.2s ease;
       text-align: center;
       width: 100%;
-    }
-
-    .jb-container {
-      min-height: 130px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 1rem;
     }
 
     /* Section Styling */
@@ -859,13 +870,64 @@
       text-decoration: underline;
     }
 
+    /* Responsive ladder — the nav sheds pieces in order of importance so it
+       never wraps and never overflows the viewport. */
+    /* Brand + 5 links + 4 buttons only coexist above this; below it the links
+       would collide with the action buttons, so they go first. */
+    @media (max-width: 1300px) {
+      .nav-links { display: none; }
+    }
+
+    @media (max-width: 900px) {
+      .brand-sub { display: none; }
+    }
+
     @media (max-width: 768px) {
-      .hero-title {
-        font-size: 2.5rem;
-      }
-      .nav-links {
-        display: none;
-      }
+      .hero-title { font-size: 2.4rem; }
+      .hero { padding: 3rem 0 2.5rem; }
+      .container { padding: 0 1rem; }
+      .nav-container { padding: 0.75rem 1rem; }
+      /* Icon-only buttons: the emoji still identifies each destination. */
+      .nav-btn .nav-label { display: none; }
+      .nav-btn { padding: 0.5rem 0.6rem; gap: 0; }
+      .market-card { padding: 1.5rem; }
+      /* Equal-width CTAs instead of ragged shrink-to-fit. */
+      .hero-actions { flex-direction: column; align-items: stretch; }
+      .hero-actions .btn-primary,
+      .hero-actions .btn-secondary { width: 100%; justify-content: center; }
+    }
+
+    @media (max-width: 520px) {
+      .brand-badge { display: none; }
+      .brand { font-size: 1rem; }
+      .hero-title { font-size: 2rem; }
+    }
+
+    /* Marketplace stat badges — replaces the fixed-width third-party iframe,
+       which could not be themed or scaled. */
+    .market-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .market-badges img {
+      height: 20px;
+      display: block;
+      border-radius: 4px;
+    }
+
+    .market-code {
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      line-height: 1.5;
+      /* Long install commands must wrap, not scroll the page sideways. */
+      overflow-wrap: anywhere;
+      word-break: break-word;
     }
   </style>
 </head>
@@ -876,29 +938,31 @@
   <nav>
     <div class="nav-container">
       <a href="#" class="brand">
-        <span>🤖📱 ADB Controller &amp; MCP Server by Samsad</span>
-        <span class="brand-badge">v1.1.0 &amp; MCP</span>
+        <span class="brand-mark">🤖</span>
+        <span class="brand-name">ADB Controller</span>
+        <span class="brand-sub">&amp; MCP Server</span>
+        <span class="brand-badge">v1.1.0</span>
       </a>
       <ul class="nav-links">
         <li><a href="#marketplaces">Downloads</a></li>
         <li><a href="#features">Features</a></li>
-        <li><a href="#demo">Live Sandbox</a></li>
-        <li><a href="#tools">51 MCP Tools</a></li>
+        <li><a href="#demo">Sandbox</a></li>
+        <li><a href="#tools">MCP Tools</a></li>
         <li><a href="#quickstart">Quick Start</a></li>
       </ul>
       <div class="nav-actions">
-        <a href="https://www.npmjs.com/package/@samsadch/adb-mcp" target="_blank" rel="noopener" class="nav-btn npm-btn">
-          <span>📦 NPM</span>
+        <a href="https://www.npmjs.com/package/@samsadch/adb-mcp" target="_blank" rel="noopener" class="nav-btn npm-btn" title="MCP server on npm">
+          <span aria-hidden="true">📦</span><span class="nav-label">NPM</span>
         </a>
-        <a href="https://marketplace.visualstudio.com/items?itemName=SamsadChalilValappil.adb-controller-by-samsad" target="_blank" rel="noopener" class="nav-btn">
-          <span>🟦 VS Code</span>
+        <a href="https://marketplace.visualstudio.com/items?itemName=SamsadChalilValappil.adb-controller-by-samsad" target="_blank" rel="noopener" class="nav-btn" title="VS Code extension">
+          <span aria-hidden="true">🟦</span><span class="nav-label">VS Code</span>
         </a>
-        <a href="https://plugins.jetbrains.com/plugin/34138" target="_blank" rel="noopener" class="nav-btn">
-          <span>🟧 JetBrains</span>
+        <a href="https://plugins.jetbrains.com/plugin/34138" target="_blank" rel="noopener" class="nav-btn" title="JetBrains / Android Studio plugin">
+          <span aria-hidden="true">🟧</span><span class="nav-label">JetBrains</span>
         </a>
         <a href="https://github.com/samsadch/SamsadADBController" target="_blank" rel="noopener" class="nav-btn">
           <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-          <span>GitHub</span>
+          <span class="nav-label">GitHub</span>
         </a>
       </div>
     </div>
@@ -978,8 +1042,12 @@
             </div>
           </div>
           <p>Native tool window panel with 1-click lifecycle buttons, live SharedPreferences editor, and battery simulators.</p>
-          <div class="jb-container" id="jetbrains-widget">
-            <!-- JetBrains Widget Injected Here -->
+          <div class="market-badges">
+            <img src="https://img.shields.io/jetbrains/plugin/v/34138?style=flat-square&labelColor=1e293b&color=fe3158&label=version" alt="JetBrains Marketplace version" loading="lazy" width="110" height="20">
+            <img src="https://img.shields.io/jetbrains/plugin/d/34138?style=flat-square&labelColor=1e293b&color=fe3158&label=downloads" alt="JetBrains Marketplace downloads" loading="lazy" width="110" height="20">
+          </div>
+          <div class="market-code" style="background: rgba(254, 49, 88, 0.1); border: 1px solid rgba(254, 49, 88, 0.3); color: #fda4af;">
+            <code>Settings → Plugins → Marketplace → “ADB Controller”</code>
           </div>
         </div>
         <a href="https://plugins.jetbrains.com/plugin/34138" target="_blank" rel="noopener" class="market-btn" style="background: rgba(254, 49, 88, 0.2); border: 1px solid rgba(254, 49, 88, 0.5); color: #fda4af;">
@@ -998,7 +1066,12 @@
             </div>
           </div>
           <p>Full sidebar control center with interactive virtual hardware bar, database inspector, and instant APK restart.</p>
-          <div style="background: rgba(0, 122, 204, 0.1); border: 1px solid rgba(0, 122, 204, 0.3); border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1.5rem; font-family: var(--font-mono); font-size: 0.85rem; color: #7dd3fc;">
+          <div class="market-badges">
+            <!-- shields.io retired its VS Code Marketplace badges; vsmarketplacebadges.dev is the maintained stand-in. -->
+            <img src="https://vsmarketplacebadges.dev/version-short/SamsadChalilValappil.adb-controller-by-samsad.svg?style=flat-square&color=007acc&labelColor=1e293b" alt="VS Code Marketplace version" loading="lazy" height="20">
+            <img src="https://vsmarketplacebadges.dev/installs-short/SamsadChalilValappil.adb-controller-by-samsad.svg?style=flat-square&color=007acc&labelColor=1e293b" alt="VS Code Marketplace installs" loading="lazy" height="20">
+          </div>
+          <div class="market-code" style="background: rgba(0, 122, 204, 0.1); border: 1px solid rgba(0, 122, 204, 0.3); color: #7dd3fc;">
             <code>ext install SamsadChalilValappil.adb-controller-by-samsad</code>
           </div>
         </div>
@@ -1018,7 +1091,11 @@
             </div>
           </div>
           <p>Standard Model Context Protocol (MCP) stdio server for Antigravity, Claude Code, Cursor, and Windsurf.</p>
-          <div style="background: rgba(203, 56, 55, 0.1); border: 1px solid rgba(203, 56, 55, 0.3); border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1.5rem; font-family: var(--font-mono); font-size: 0.85rem; color: #fca5a5;">
+          <div class="market-badges">
+            <img src="https://img.shields.io/npm/v/%40samsadch%2Fadb-mcp?style=flat-square&labelColor=1e293b&color=cb3837&label=npm" alt="npm version" loading="lazy" width="90" height="20">
+            <img src="https://img.shields.io/npm/dm/%40samsadch%2Fadb-mcp?style=flat-square&labelColor=1e293b&color=cb3837&label=downloads" alt="npm downloads per month" loading="lazy" width="120" height="20">
+          </div>
+          <div class="market-code" style="background: rgba(203, 56, 55, 0.1); border: 1px solid rgba(203, 56, 55, 0.3); color: #fca5a5;">
             <code>npx -y @samsadch/adb-mcp</code>
           </div>
         </div>
@@ -1232,17 +1309,6 @@
 
   <!-- Interactive Scripts -->
   <script>
-    // Initialize JetBrains Marketplace Card Widget
-    if (window.MarketplaceWidget) {
-      MarketplaceWidget.setupMarketplaceWidget('card', 34138, "#jetbrains-widget");
-    } else {
-      window.addEventListener('load', function() {
-        if (window.MarketplaceWidget) {
-          MarketplaceWidget.setupMarketplaceWidget('card', 34138, "#jetbrains-widget");
-        }
-      });
-    }
-
     // 51 Tools Data
     const TOOLS_DATA = [
       // Discovery
