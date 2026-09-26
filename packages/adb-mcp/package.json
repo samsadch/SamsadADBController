@@ -1,6 +1,6 @@
 {
   "name": "@samsadch/adb-mcp",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Model Context Protocol (MCP) server for Android ADB: inspect databases, capture screenshots, manage apps, edit SharedPreferences, and control devices with AI agents in Antigravity, Claude, Cursor, and Windsurf.",
   "license": "MIT",
   "keywords": [

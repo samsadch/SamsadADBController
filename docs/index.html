@@ -1280,7 +1280,6 @@
         <button class="code-tab-btn active" onclick="switchCodeTab(0)">Claude Code</button>
         <button class="code-tab-btn" onclick="switchCodeTab(1)">Antigravity / Cursor / Windsurf</button>
         <button class="code-tab-btn" onclick="switchCodeTab(2)">VS Code Extension</button>
-        <button class="code-tab-btn" onclick="switchCodeTab(3)">Android Studio / IntelliJ</button>
       </div>
       <div class="code-tab-content">
         <button class="copy-code-btn" onclick="copyActiveCode()">Copy</button>
@@ -1430,8 +1429,7 @@
     const CODE_SNIPPETS = [
       `claude mcp add adb -- npx -y @samsadch/adb-mcp`,
       `{\n  "mcpServers": {\n    "adb": {\n      "command": "npx",\n      "args": ["-y", "@samsadch/adb-mcp"]\n    }\n  }\n}`,
-      `# In VS Code Extensions: search "ADB Controller by Samsad" or install VSIX\ncode --install-extension SamsadChalilValappil.adb-controller-by-samsad`,
-      `# Clone and build local Android Studio plugin\ngit clone https://github.com/samsadch/SamsadADBController.git\ncd SamsadADBController && ./gradlew buildPlugin`
+      `# In VS Code Extensions: search "ADB Controller by Samsad" or install VSIX\ncode --install-extension SamsadChalilValappil.adb-controller-by-samsad`
     ];
 
     let activeTabIdx = 0;
