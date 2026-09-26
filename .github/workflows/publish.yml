@@ -11,9 +11,6 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -23,16 +20,19 @@ jobs:
         with:
           node-version: 22
           registry-url: 'https://registry.npmjs.org'
-          scope: '@samsadch'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
+
+      - name: Build packages
+        run: |
+          npm run build --workspace=@samsadch/adb-core
+          npm run build --workspace=@samsadch/adb-mcp
 
       - name: Run unit tests
-        run: npm test
-
-      - name: Build all workspaces
-        run: npm run build
+        run: |
+          npm test --workspace=@samsadch/adb-core
+          npm test --workspace=@samsadch/adb-mcp
 
       - name: Authenticate with NPM
         run: echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
