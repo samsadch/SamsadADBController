@@ -11,13 +11,14 @@ Part of [ADB Controller by Samsad](https://github.com/samsadch/SamsadADBControll
 * **100% Offline & Private**: Direct local ADB bridge communication. Zero telemetry, zero cloud relay.
 * **Sticky Target Pinning**: Call `set_target` once; all subsequent tools infer the active device and package.
 * **Multimodal Vision**: Real-time PNG screen capture for multimodal visual reasoning.
-* **Structured UI Automator Inspection**: Complete UI hierarchy extraction with bounding box calculations and clickable state resolution.
+* **Structured UI Automator & Semantic Actions**: Complete UI hierarchy extraction, bounding box calculations, clickable state resolution, and direct semantic actions (`tap_by_text`, `tap_by_id`, `assert_ui_element`).
 * **Smart Touch & Gestures**: Tap by text, ID, or coordinates; swipe with auto-calculated screen geometry; dispatch hardware keycodes.
 * **App Lifecycle & Runtime Permissions**: Install APKs, clear caches, restart apps, grant/revoke permissions dynamically.
 * **Deep SQLite & SharedPreferences Inspection**: Query SQLite databases, browse tables, create tables, truncate, delete rows, and edit SharedPreferences XML with strict data typing.
 * **Non-blocking Logcat & Memory Diagnostics**: Real-time log capture with PID/tag/severity filters and `dumpsys meminfo` process allocation breakdowns.
 * **Hardware & Power Simulator**: Simulated battery levels, discharge states, Doze idle states, UI theme toggles, and broadcast intent injection.
-* **File Transfers & Shell Execution**: Push/pull files and directories, and execute ad-hoc device shell commands.
+* **Remote File Explorer & Safe Shell**: List directories, read file contents directly on device, create/move/delete files, push/pull transfers, and execute ad-hoc device shell commands.
+* **Google Cloud Device Streaming**: Discover and stream physical devices in Google Cloud via the modern Android CLI.
 
 ---
 

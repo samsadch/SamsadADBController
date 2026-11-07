@@ -55,11 +55,18 @@ Compact button strip with tooltips:
   - **Insert Row & Save & Restart**: Insert records and soft restart app in 1 click.
 - **💾 Export SQLite DBs & Prefs**: Pulls all databases and XML files to `.adb_exports/<package>/` in your project workspace.
 
-### 🔗 7. Deep Link & URL Tester
+### 📂 7. Remote Device File Explorer
+- Browse on-device files and folders (`/sdcard`, download directories, app sandboxes).
+- View file metadata (permissions, file sizes, last modified dates).
+- Directly view and inspect text/log files on device.
+- Create new folders, rename/move items, and delete files/folders remotely.
+- Integrated file upload (push to device) and file download (pull to host).
+
+### 🔗 8. Deep Link & URL Tester
 - Enter custom scheme (e.g. `myapp://details?id=123`) or web link (e.g. `https://example.com`).
 - Click **🚀 Open Deep Link** to dispatch directly to the device.
 
-### 📢 8. Broadcast & Intent Tester
+### 📢 9. Broadcast & Intent Tester
 - Enter broadcast action (e.g. `com.example.MY_NOTIFICATION`).
 - Enter optional extra parameters (`key=value`).
 - Click **📢 Send Broadcast** to trigger local receivers.

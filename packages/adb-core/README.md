@@ -37,6 +37,9 @@ await adb.restartApp(devices[0].id, 'com.example.app');
 | App lifecycle | `launchApp`, `restartApp`, `clearAppData`, `forceStopApp`, `uninstallApp`, `getInstalledPackages` |
 | Display & power | `toggleDarkMode`, `toggleAnimations`, `toggleLayoutBounds`, `setBatteryLevel`, `forceDozeMode`, … |
 | Input & intents | `sendKeyEvent`, `sendDeepLink`, `sendBroadcast` |
+| UI Automator & Vision | `dumpViewHierarchy`, `findUiNodes`, `tapElement`, `tapBySelector`, `assertUiElement` |
+| Files & Explorer | `listDirectory`, `readDeviceFileText`, `createDirectory`, `deleteFile`, `moveFile`, `pushFile`, `pullFile` |
+| Cloud Device Streaming | `checkAndroidCliAvailable`, `listStreamingDevices`, `startDeviceStream`, `stopDeviceStream` |
 | Storage | `getSharedPrefsFiles`, `readSharedPrefsXml`, `writeSharedPrefsXml`, `exportAppData` |
 | Databases | `DatabaseService` — pulls the app's SQLite file, queries it with the host `sqlite3`, pushes writes back |
 | Workspace | `autoDetectPackage` — finds an `applicationId` from Gradle or the manifest |
@@ -76,9 +79,10 @@ Codes: `ADB_NOT_FOUND`, `NO_DEVICE`, `AMBIGUOUS_DEVICE`, `DEVICE_OFFLINE`, `DEVI
 
 ## Known issues
 
-`captureScreenshot` and the database half of `exportAppData` rely on a shell redirect that is
-swallowed by argument quoting, so they currently write nothing locally. Both are marked in the
-source and scheduled for the next release. See Issue I1 in the repository's `PROJECT.md`.
+The database half of `exportAppData` relies on a shell redirect that is swallowed by argument
+quoting, so it currently writes nothing locally. It is marked in the source and scheduled for
+a future update. See Issue I1 in the repository's `PROJECT.md`. Note that binary screenshot
+capture (`captureScreenshot`) is fully functional via `execOut`.
 
 ## License
 
