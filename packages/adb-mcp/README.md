@@ -90,7 +90,7 @@ node packages/adb-mcp/out/index.js --http   # streamable HTTP
 
 ---
 
-## 🛠️ Complete MCP Tool Catalog (51 Tools)
+## 🛠️ Complete MCP Tool Catalog (62 Tools)
 
 ### 1. Device Discovery & Sticky Target (3 Tools)
 | Tool | Description |
@@ -99,11 +99,14 @@ node packages/adb-mcp/out/index.js --http   # streamable HTTP
 | `set_target` | Pins the active device and/or Android package for all subsequent operations. |
 | `get_device_info` | Retrieves OS version, SDK level, screen size, density, battery level, and dark mode. |
 
-### 2. Eyes & Hands: UI Vision & Precision Automation (8 Tools)
+### 2. Eyes & Hands: UI Vision & Precision Automation (11 Tools)
 | Tool | Description |
 | :--- | :--- |
 | `take_screenshot` | Captures a live screenshot as a multimodal PNG image. |
 | `dump_view_hierarchy` | Dumps structured on-screen UI hierarchy JSON with bounding boxes, center coordinates, IDs, and click states. |
+| `tap_by_text` | **(New)** Directly finds an on-screen element by visible text, computes its center coordinates, and taps it in one step. |
+| `tap_by_id` | **(New)** Directly finds an on-screen element by Android resource-id and taps it. |
+| `assert_ui_element` | **(New)** Verifies whether a matching UI element (by text, ID, or description) is currently visible on the screen. |
 | `tap_element` | Finds an on-screen UI element by visible text, resource-id, or content-desc and taps its center. |
 | `tap_coordinates` | Performs a touch event at specific `(x, y)` pixel coordinates. |
 | `input_text` | Types text into the active input field with automated character and space escaping. |
@@ -168,12 +171,24 @@ node packages/adb-mcp/out/index.js --http   # streamable HTTP
 | `toggle_animations` | Enables or disables system animations (window, transition, and animator scales) or toggles between 1.0x and 0.0x. |
 | `send_broadcast` | Sends custom broadcast intent with action, package, component, and typed extras dictionary. |
 
-### 8. File Transfers & Safe Ad-hoc Shell (3 Tools)
+### 8. File Explorer, Transfers & Safe Shell (8 Tools)
 | Tool | Description |
 | :--- | :--- |
+| `list_directory` | **(New)** Lists all files and directories at a remote path (e.g. `/sdcard`, app sandbox) with type, permissions, size, and date. |
+| `read_device_file` | **(New)** Directly reads text content of a remote file on device without pulling it to the host filesystem. |
+| `create_directory` | **(New)** Recursively creates a new directory (`mkdir -p`) on the Android device. |
+| `delete_file` | **(New)** Recursively deletes a file or directory (`rm -rf`) on the device. |
+| `move_file` | **(New)** Moves or renames a file or directory (`mv`) on the device. |
 | `push_file` | Transfers a local file or directory from the host machine to the Android device. |
 | `pull_file` | Transfers a file or directory from the Android device to the host machine. |
 | `execute_shell_command` | Executes an arbitrary ADB shell command on the target device and returns standard output. |
+
+### 9. Google Cloud Device Streaming via Android CLI (3 Tools)
+| Tool | Description |
+| :--- | :--- |
+| `list_cloud_devices` | **(New)** Lists remote physical devices (Pixel 10 Pro, Galaxy S24, foldables) available for cloud streaming via the Android CLI. |
+| `start_cloud_device_stream` | **(New)** Reserves and connects to a remote physical device in Google Cloud over an ADB-over-SSL tunnel. |
+| `stop_cloud_device_stream` | **(New)** Releases an active cloud device reservation session. |
 
 ---
 

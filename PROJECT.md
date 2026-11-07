@@ -218,7 +218,10 @@ Completes the build → install → drive → verify loop. With Phases 0–3 an 
 
 Return an explicit "emulator only" error where injection is unsupported on physical devices, rather than passing adb's stderr through.
 
-### Phase 6 — Resources & Prompts 📚
+### Phase 6 (original plan) — Resources & Prompts 📚
+
+> Not built. Carried forward as a cross-cutting item in §9 — the phase number has been reused
+> by the current roadmap.
 
 **Resources (browsable state, no tool call required):**
 
@@ -236,7 +239,11 @@ Return an explicit "emulator only" error where injection is unsupported on physi
 - `test_deep_link_flow` — dispatch, screenshot destination, assert DB state
 - `fresh_install_walkthrough` — clear data, launch, drive onboarding, report
 
-### Phase 7 — Packaging 🛠️
+### Phase 7 (original plan) — Packaging 🛠️
+
+> Mostly delivered: `npx @samsadch/adb-mcp` is live, and the HTTP transport covers Android
+> Studio. The VS Code `mcpServerDefinitionProvider` and the JetBrains "Copy MCP config" button
+> remain unbuilt. The phase number has been reused by the current roadmap in §9.
 
 | Target | Mechanism |
 |---|---|
@@ -272,6 +279,9 @@ Zero-config VS Code registration is the highest-value packaging item: it turns "
 | R5 | Duplicate Kotlin/TypeScript executors drift as MCP features land | Medium | Medium | Accept for now; shared package covers TS surfaces only; revisit post-Phase 7 |
 | R6 | `uiautomator dump` fails on `FLAG_SECURE` screens and mid-animation | Medium | Low | Retry once after a short delay, then fall back to screenshot |
 | R7 | Agent runs a destructive tool unprompted | Low | High | Annotations + confirm gates (see Section 5) |
+| R8 | §9 Phase 7 build tools execute untrusted code **on the host** — a `build.gradle.kts` runs arbitrary JVM code at configuration time. Combined with `--http --allow-external` this is remote code execution on the developer's machine | Medium | Critical | Gate every build tool behind an explicit `--allow-build`, default off; refuse build tools outright on a non-loopback bind |
+| R9 | Gradle builds outlive MCP client request timeouts — a cold build is minutes, clients give up far sooner | High | Medium | Job model: `gradle_build` returns a job id immediately; `get_build_status` / `get_build_log` poll. New infrastructure, not just another tool file |
+| R10 | Catalogue reaches ~100 tools across Phases 6–13, degrading agent tool selection (extends R4) | High | Medium | Group each new phase behind `action` enums from the start; consider per-phase opt-in flags so a client loads only what it needs |
 
 ---
 
@@ -288,14 +298,21 @@ Zero-config VS Code registration is the highest-value packaging item: it turns "
 | 2026-09-24 | Preserve the shell-redirect bug rather than fix it during extraction | Keeps the refactor behaviour-preserving and the diff trustworthy; fix scheduled with Phase 1 (Issue I1) |
 | 2026-09-24 | MCP package is ESM, core stays CommonJS | The SDK's type declarations resolve through its ESM path |
 | 2026-09-24 | Publish `0.0.1` from a laptop now, not `0.1.0` | Reserves the `@samsad` scope and proves the `npx` path; keeps `0.1.0` for the real Phase 1+2 release. Provenance is per-version, so a later move to GitHub Actions costs nothing |
+| 2026-09-26 | Add a streamable HTTP transport alongside stdio | Android Studio's Gemini integration accepts only `httpUrl`; without it the server is unreachable from the IDE Android developers actually use |
+| 2026-09-26 | Extend scope past the device, to the build → test → debug loop (§9) | The 51 shipped tools all act on an already-running app. The rest of a Kotlin developer's day — Gradle, tests, crashes, profiling — was entirely uncovered |
+| 2026-09-26 | Build tools stay opt-in behind `--allow-build` | They execute untrusted host code, a materially different threat model from device shell commands (R8) |
+| 2026-09-26 | Sequence Phases 6 and 9 first, defer Phase 7 | Both are small, add no new security surface, and cover the two failure modes hit in practice: no device attached, and hand-reading logcat. Gradle is the bigger prize but needs a job-model design pass (R9) |
+| 2026-09-26 | Add Phase 13 (DataStore + process death) | The shipped storage tools target SharedPreferences and SQLite; DataStore is what Google now recommends, and nothing on-device decodes it. Process-death restoration is a common bug class with no convenient reproduction |
+| 2026-09-26 | Reject five reviewed proposals as already shipped (§9.11) | `query_room_db`, `tap_element`, `type_text` and `inject_deeplink` duplicate existing tools; the `run-as` sandbox they describe already underpins `databaseService.ts`. Recorded rather than silently dropped, so the same ideas are not re-proposed |
 
 ---
 
 ## 8. Current Status & Next Steps
 
-> ⚠️ **Sections 4–7 below are stale.** They describe the original Phase 0–7 plan. Phases 1–5
+> ⚠️ **Sections 4–7 above are stale.** They describe the original Phase 0–7 plan. Phases 1–5
 > have since been built (51 tools) outside the sessions that maintain this file; the phase
-> tables have not been rewritten to match. Treat Section 8 as current.
+> tables have not been rewritten to match. Treat Sections 8 and 9 as current — §9 reuses the
+> numbers 6 and 7 for new work.
 
 **Status:** v1.1.0 shipped on both marketplaces. MCP server at **51 tools**, published at
 `0.0.2`, with both stdio and streamable HTTP transports.
@@ -329,11 +346,12 @@ verify a release by installing the tarball and running `node_modules/.bin/<name>
 
 **Immediate next steps:**
 
-1. Publish `0.0.3` (or `0.1.0`) carrying the HTTP transport, and verify it end to end from
-   Android Studio's MCP Servers panel.
-2. Rewrite Sections 4–7 to match the 51 tools that actually shipped.
-3. Backport the configurable-timeout fix to the Kotlin `AdbExecutor`.
-4. Publish the site's marketplace links once the VS Code and JetBrains listings are refreshed
+1. ✅ `0.0.3` published 2026-09-26 via the CI workflow, carrying the HTTP transport. End-to-end
+   verification from Android Studio's MCP Servers panel still outstanding.
+2. Start §9 Phase 6 (emulator lifecycle) and Phase 9 (crash intelligence).
+3. Rewrite Sections 4–7 to match the 51 tools that actually shipped.
+4. Backport the configurable-timeout fix to the Kotlin `AdbExecutor`.
+5. Publish the site's marketplace links once the VS Code and JetBrains listings are refreshed
    for the MCP feature set.
 
 **Open questions:**
@@ -343,3 +361,222 @@ verify a release by installing the tarball and running `node_modules/.bin/<name>
 - Whether to add ESLint to the workspace; there is currently no linter on the TypeScript side.
 - Whether the npm description — which advertises databases, SharedPreferences, logcat and
   screenshots — should be trimmed until every claim maps to a shipped tool.
+
+---
+
+## 9. Roadmap — Phases 6–13
+
+> Supersedes the Phase 6–7 entries in §4, which are retained only as a record of the original
+> plan. Drafted 2026-09-26; nothing below is built. Phase 13 and several tools in Phases 7, 9
+> and 12 were added later the same day from a second round of review — §9.11 records which
+> proposals from that round were dropped as already shipped.
+
+### 9.1 The gap this closes
+
+All 51 shipped tools share one trait: **they act on an already-running app on an
+already-attached device.** That is one half of Android work. The other half — build, test,
+crash, profile — is entirely uncovered, and it is where a Kotlin developer spends most of the
+day.
+
+The clearest symptom: when the Pixel dropped off wireless debugging during the 2026-09-26
+session, `list_devices` returned *"No devices connected"* and the agent had no tool with which
+to fix it. It could drive a device but not obtain one.
+
+The §3.1 filter still applies to every tool below — if a shell does it just as well, it does
+not ship. Two things keep this honest:
+
+- In Claude Code these tools compete with `Bash`, which can already run Gradle. In **Android
+  Studio's Gemini they compete with nothing** — it has no shell at all. That is the real
+  audience for Phases 7 and 8.
+- Parsing is the other differentiator. `get_last_crash` beats `adb logcat | grep` because it
+  returns *one structured exception*, not 10,000 lines for the model to wade through.
+
+Feasibility was confirmed against the local SDK on 2026-09-26: `emulator`, `avdmanager`,
+`sdkmanager`, `apkanalyzer` (all under `cmdline-tools/latest/bin` or `emulator/`) and `aapt2`
+(`build-tools/36.0.0`) are present. `bundletool` is not, and would need resolving before any
+AAB tool ships.
+
+### 9.2 Phase 6 — Emulator & device lifecycle 📱
+
+Unblocks every other phase. Today a missing device is a dead end.
+
+| Tool | Backing command | Agent use case |
+|---|---|---|
+| `list_avds` | `emulator -list-avds` | "What can I boot?" |
+| `start_emulator` / `stop_emulator` | `emulator -avd <n>` · `adb emu kill` | "Boot a Pixel 8 API 34" |
+| `create_avd` | `avdmanager create avd` | "I need an API 30 device to reproduce this" |
+| `wait_for_device` | `adb wait-for-device` + `sys.boot_completed` poll | Gate every later call on a *usable* device, not just a listed one |
+| `pair_wireless` / `connect_wireless` | `adb pair` · `adb connect` | The §2.3 Wi-Fi work, resurfacing as a tool rather than a UI feature |
+| `reboot_device` | `adb reboot` | "Reboot and check the boot receiver" |
+
+Note `wait_for_device`: `adb devices` reports a device before it is ready, and the resulting
+race is a classic flaky-automation source. Polling `sys.boot_completed` is the whole value.
+
+### 9.3 Phase 7 — Gradle & build 🏗️
+
+Highest value, heaviest design cost. An agent that cannot build cannot close the loop.
+
+| Tool | Description |
+|---|---|
+| `gradle_build` / `gradle_clean` / `gradle_tasks` | The basics, via the job model below |
+| `gradle_install_debug` | Assemble + install the debug variant |
+| `build_and_launch` | Composite: assemble → install → start → tail logcat |
+| `analyze_last_build_error` | Parse `./gradlew --scan` or raw build output; strip Kotlin-daemon and AGP-internal boilerplate; surface the **root** syntax / KSP / Hilt annotation-processing error |
+| `audit_dependency_conflicts` | `app:dependencies` → BOM version skew, duplicate-class warnings, transitive mismatches |
+| `clean_stale_caches` | Targeted invalidation of `.gradle/caches`, `.cxx`, build cache — not a scorched-earth wipe of the whole Studio cache |
+| `run_android_lint` · `run_detekt` · `run_ktlint` | Static analysis, results returned parsed |
+
+`analyze_last_build_error` is probably the single highest-value tool in this phase. An AGP
+failure routinely buries the one real error — a missing Hilt `@Inject`, a KSP version
+mismatch — under a thousand lines of daemon noise. Extracting the root cause is pure parsing,
+which is exactly the §3.1 filter. `clean_stale_caches` matters because the usual remedy is
+deleting everything and waiting ten minutes for a full re-index.
+
+Two blockers must be solved before any of it ships:
+
+1. **Host execution is a different threat model (R8).** Everything today runs on the *device*.
+   Gradle runs arbitrary JVM code from `build.gradle.kts` on the *developer's machine*. Gate
+   behind `--allow-build`, default off, and refuse entirely on a non-loopback bind.
+2. **Builds outlive request timeouts (R9).** Needs a job model — `gradle_build` returns a job
+   id, `get_build_status` and `get_build_log` poll. This is new infrastructure.
+
+`gradle_dependencies` deserves note: dependency-conflict resolution is miserable by hand and
+almost purely mechanical, which makes it unusually good agent work.
+
+### 9.4 Phase 8 — Testing ✅
+
+| Tool | Description |
+|---|---|
+| `run_unit_tests` | JVM tests via the Gradle job model |
+| `run_instrumented_tests` | `connectedAndroidTest` — depends on Phase 6 for a device |
+| `run_single_test` | `--tests "com.foo.BarTest.baz"` — the tight red/green loop |
+| `summarize_test_report` | Parse the JUnit XML into pass/fail/trace, rather than making the agent read the HTML report |
+| `capture_failure_screenshots` | Pull screenshots for failed instrumented tests |
+
+`summarize_test_report` is the one that passes §3.1 most clearly — the raw report is HTML built
+for a browser, and parsing it is exactly what a shell cannot do reliably.
+
+### 9.5 Phase 9 — Crash, ANR & stacktrace intelligence 🔍
+
+`get_logcat` exists but returns a firehose. This phase is where Kotlin specifically hurts:
+coroutine stacks are deep and noisy, and R8 makes release traces unreadable.
+
+| Tool | Why it beats a shell |
+|---|---|
+| `get_last_crash` | Returns the last `FATAL EXCEPTION` block for a package, parsed — not the surrounding 10k lines. Includes the app's own preceding log lines (ViewModel / state logs) as crash context, since the exception alone rarely explains *why* |
+| `deobfuscate_stacktrace` | R8 `retrace` against `mapping.txt`; turns `a.b.c(SourceFile:1)` into real symbols |
+| `get_anr_trace` | Pulls `/data/anr/traces.txt`, isolates the blocked main thread, and reports **lock contention and deadlock cycles** — which thread holds the monitor the main thread is waiting on |
+| `get_tombstone` | Native/NDK crashes |
+| `tail_logcat_filtered` | Package + level + tag, with the app's PID resolved automatically |
+| `watch_for_crash` | Run an action, report any crash it caused — closes the act/observe loop |
+
+Supersedes the `get_crash_log` sketch in §4 Phase 2.
+
+### 9.6 Phase 10 — Performance & profiling 📊
+
+`get_startup_time` (`am start -W`, cold/warm) · `get_frame_stats` (`dumpsys gfxinfo` → jank
+percentiles) · `dump_heap` (hprof for leak hunting) · `get_network_stats` ·
+`record_perfetto_trace` · `generate_baseline_profile`
+
+`get_app_memory` already ships and belongs to this family.
+
+Perfetto traces are large binary artifacts — the tool must return a *path and a summary*, never
+the trace itself, or it will exhaust a context window (cf. R3).
+
+### 9.7 Phase 11 — APK / AAB inspection 📦
+
+| Tool | Backing tool |
+|---|---|
+| `inspect_apk` | `aapt2 badging` — min/target SDK, permissions, activities |
+| `apk_size_breakdown` | `apkanalyzer` |
+| `compare_apks` | Size regression between two builds — "what did this PR cost us?" |
+| `list_manifest_permissions` | Merged-manifest permissions, with the library that introduced each |
+
+AAB support needs `bundletool`, which is not installed locally (§9.1).
+
+### 9.8 Phase 12 — Compose & modern UI 🎨
+
+`dump_view_hierarchy` returns the legacy View tree, which is largely **empty for a Compose
+app** — this is R2, and it worsens as the ecosystem moves to Compose.
+
+| Tool | Description |
+|---|---|
+| `dump_compose_semantics` | The Compose semantics tree, including `testTag` |
+| `capture_annotated_screen` | Screenshot **with element bounding boxes and coordinates drawn on it** |
+| `get_recomposition_counts` | Find the composable re-rendering 400 times a second |
+| `accessibility_audit` | Touch-target size, contrast, missing content descriptions |
+| `screenshot_diff` | Visual regression between two captures |
+
+`capture_annotated_screen` is the standout, and it is not Compose-specific — it works against
+the legacy View tree too. Today an agent needs two calls to act on a screen (`take_screenshot`
+to see it, `dump_view_hierarchy` to locate anything) and must then correlate a picture with a
+JSON tree by hand. One image with the boxes already drawn collapses that into a single call
+and removes the correlation step entirely, which is where agents currently misfire. It is
+independently shippable ahead of the rest of this phase — see §9.10.
+
+Extending the shipped `tap_element` to resolve `testTag` follows directly from
+`dump_compose_semantics`; it is an upgrade to an existing tool, not a new one.
+
+This phase retires R2 rather than mitigating it.
+
+### 9.9 Phase 13 — Modern state & process lifecycle 🧬
+
+Added 2026-09-26. The shipped storage tools cover SQLite and SharedPreferences — the state APIs
+of 2015. Two gaps remain, both confirmed absent from the codebase (zero references to
+`DataStore` or `am kill`).
+
+| Tool | Description |
+|---|---|
+| `inspect_datastore` | Decode and read **Jetpack DataStore** — both Preferences and Proto — straight off the device |
+| `write_datastore` | Set a single key, mirroring the existing `set_shared_preference` semantics. `confirm: true`, per §5 |
+| `trigger_process_death` | `am kill <pkg>` (background kill, *not* force-stop), then relaunch — reproducing exactly what Android does under memory pressure |
+
+**Why `inspect_datastore` matters:** DataStore is Google's recommended replacement for
+SharedPreferences, so the shipped prefs tools are aimed at a shrinking target. It is also
+strictly harder — the files are Protobuf, not XML, so there is no shell one-liner. Proto
+DataStore additionally needs the app's `.proto` schema to decode meaningfully; Preferences
+DataStore uses a known internal schema and should ship first. Today the only way to see this
+state is to add temporary logging and rebuild.
+
+**Why `trigger_process_death` matters:** restoring from background process death is one of the
+most commonly broken paths in Android apps, because testing it by hand means backgrounding the
+app and waiting for the system to reclaim it — or fishing the "Don't keep activities" toggle
+out of Developer Options, which is a blunter simulation. `am kill` reproduces it on demand,
+making `SavedStateHandle` and `rememberSaveable` restoration directly testable. Note the
+distinction from the shipped `stop_app`: `am force-stop` clears state that a real system kill
+leaves behind, so force-stop is the *wrong* primitive for this test and would give a false pass.
+
+### 9.10 Carried forward — Resources & Prompts
+
+The original §4 Phase 6 (MCP resources such as `adb://devices` and prompts such as
+`diagnose_crash`) was never built and is not scheduled here. It is now more valuable, not less:
+`diagnose_crash` becomes a genuinely strong prompt once Phase 9 lands. Treat it as a
+cross-cutting item to revisit after Phase 9.
+
+### 9.11 Already shipped — deliberately not re-scoped
+
+Several proposals reviewed on 2026-09-26 describe tools that already exist. Recorded here so
+the roadmap does not re-promise them, per the convention-before-creation rule:
+
+| Proposed | Shipped equivalent |
+|---|---|
+| `query_room_db` | `query_database`, `list_databases`, `list_database_tables`, `get_table_schema`, `get_table_data`, `inspect_database_overview` — already read-only by default with a row cap, and already via `run-as` |
+| `tap_element`, `type_text` | `tap_element`, `input_text` |
+| `inject_deeplink` | `open_deep_link` |
+| `tail_crash_trace` | Folded into §9.5 `get_last_crash` + `watch_for_crash` |
+| `dump_anr_traces` | Folded into §9.5 `get_anr_trace`, which gained deadlock detection from it |
+
+The `run-as` sandbox mechanism these describe is already the foundation of
+`databaseService.ts`. What was genuinely missing was never the access path — it was DataStore
+decoding (§9.9) and Compose-aware targeting (§9.8).
+
+### 9.12 Sequencing
+
+| Order | Phases | Rationale |
+|---|---|---|
+| Quick win | `capture_annotated_screen` (§9.8) | Does not depend on the rest of Phase 12. Halves the call count for every UI interaction and removes the screenshot↔hierarchy correlation step agents get wrong |
+| 1st | **6 + 9** | Small, no new security surface, and they cover the two failure modes actually hit: no device attached, and hand-reading logcat. Phase 9 is where an agent clearly beats a human — retracing a stack is mechanical work nobody enjoys |
+| 2nd | **13** | Small, self-contained, and reuses the existing `run-as` plumbing. `trigger_process_death` is a handful of lines for a bug class that is otherwise painful to reproduce |
+| 3rd | **7**, then 8 | Biggest prize, but needs the job model (R9) and the `--allow-build` gate (R8) designed first. Phase 8 is nearly free once 7 exists. If Phase 7 must be cut to one tool, make it `analyze_last_build_error` |
+| 4th | 11, 12 | Independent of the rest; 12 retires R2 |
+| Last | 10 | Most valuable with a mature app under test, least valuable in isolation |

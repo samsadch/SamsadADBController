@@ -106,8 +106,31 @@ export {
   pushFile,
   pullFile,
   executeShellCommand,
-  type ShellCommandResult
+  listDirectory,
+  createDirectory,
+  deleteDeviceFile,
+  moveDeviceFile,
+  readDeviceFileText,
+  formatFileSize,
+  parseLsLine,
+  type ShellCommandResult,
+  type DeviceFileEntry
 } from './files';
+export {
+  tapBySelector,
+  assertUiElement,
+  type SelectorOptions,
+  type TapSelectorResult,
+  type AssertUiResult
+} from './semanticUi';
+export {
+  checkAndroidCliAvailable,
+  listStreamingDevices,
+  startDeviceStream,
+  stopDeviceStream,
+  type StreamingDevice,
+  type StreamingSessionResult
+} from './deviceStreaming';
 export * as apps from './apps';
 export * as controls from './deviceControls';
 export * as storage from './storage';
@@ -116,4 +139,6 @@ export * as uiHierarchy from './uiHierarchy';
 export * as navigation from './navigation';
 export * as diagnostics from './diagnostics';
 export * as files from './files';
+export * as semanticUi from './semanticUi';
+export * as deviceStreaming from './deviceStreaming';
 export { AdbExecutor } from './adbExecutor';

@@ -72,7 +72,20 @@ test('createServer registers all Phase 0, Phase 1, Phase 2, and Phase 3 tools an
     // Phase 5
     'push_file',
     'pull_file',
-    'execute_shell_command'
+    'execute_shell_command',
+    'list_directory',
+    'read_device_file',
+    'create_directory',
+    'delete_file',
+    'move_file',
+    // Semantic UI
+    'tap_by_text',
+    'tap_by_id',
+    'assert_ui_element',
+    // Cloud Device Streaming
+    'list_cloud_devices',
+    'start_cloud_device_stream',
+    'stop_cloud_device_stream'
   ];
 
   for (const toolName of expectedTools) {
@@ -534,5 +547,29 @@ test('MCP Phase 4 & Phase 5 tool handlers execute cleanly', async () => {
   const shellJson = JSON.parse(shellRes.content[0].text);
   assert.equal(shellJson.command, 'getprop ro.build.version.release');
   assert.ok(shellJson.output.includes('output of getprop'));
+
+  // 15. list_directory
+  const listDirRes = await tools['list_directory'].handler({ path: '/sdcard' });
+  assert.equal(listDirRes.isError, undefined);
+
+  // 16. read_device_file
+  const readFileRes = await tools['read_device_file'].handler({ path: '/sdcard/test.txt' });
+  assert.equal(readFileRes.isError, undefined);
+
+  // 17. create_directory
+  const mkdirRes = await tools['create_directory'].handler({ path: '/sdcard/NewDir' });
+  assert.equal(mkdirRes.isError, undefined);
+
+  // 18. delete_file
+  const rmRes = await tools['delete_file'].handler({ path: '/sdcard/old.txt' });
+  assert.equal(rmRes.isError, undefined);
+
+  // 19. move_file
+  const mvRes = await tools['move_file'].handler({ sourcePath: '/sdcard/a.txt', destPath: '/sdcard/b.txt' });
+  assert.equal(mvRes.isError, undefined);
+
+  // 20. list_cloud_devices
+  const cloudListRes = await tools['list_cloud_devices'].handler({});
+  assert.equal(cloudListRes.isError, undefined);
 });
 

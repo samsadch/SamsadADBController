@@ -14,6 +14,8 @@ import { registerSharedPreferencesTools } from './tools/sharedPreferences.js';
 import { registerDiagnosticsTools } from './tools/diagnostics.js';
 import { registerDeviceControlTools } from './tools/deviceControls.js';
 import { registerSystemTools } from './tools/system.js';
+import { registerSemanticUiTools } from './tools/semanticUi.js';
+import { registerDeviceStreamingTools } from './tools/streaming.js';
 
 // Read from package.json rather than a literal, so the version reported over MCP can never
 // drift from the published one. package.json is always present in the tarball.
@@ -51,6 +53,8 @@ export function createServer(config: AdbConfig = {}): { server: McpServer; targe
   registerDiagnosticsTools(server, target);
   registerDeviceControlTools(server, target);
   registerSystemTools(server, target);
+  registerSemanticUiTools(server, target);
+  registerDeviceStreamingTools(server);
 
   return { server, target };
 }

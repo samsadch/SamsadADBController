@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ADB Controller &amp; MCP Server by Samsad 🚀 — Modern Android Suite for Developers &amp; AI Agents</title>
-  <meta name="description" content="100% offline, high-productivity control panel for Android Studio & VS Code, and a 51-tool Model Context Protocol (MCP) server for AI coding agents (Antigravity, Claude Code, Cursor, Windsurf)." />
+  <meta name="description" content="100% offline, high-productivity control panel for Android Studio & VS Code, and a 62-tool Model Context Protocol (MCP) server for AI coding agents (Antigravity, Claude Code, Cursor, Windsurf) with Device File Explorer, Semantic UI automation, and Cloud Device Streaming." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -1117,8 +1117,20 @@
     <div class="features-grid">
       <div class="feature-card">
         <div class="feature-icon">🤖</div>
-        <h3>51-Tool AI Agent MCP Server</h3>
-        <p>Give Google Antigravity, Claude Code, Cursor, and Windsurf full vision (multimodal screenshots), precise gestures (tap, swipe), SQLite querying, and memory profiling.</p>
+        <h3>62-Tool AI Agent MCP Server</h3>
+        <p>Give Google Antigravity, Claude Code, Cursor, and Windsurf full vision, semantic 1-step taps (`tap_by_text`), full device file explorer, cloud streaming, SQLite querying, and memory profiling.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📁</div>
+        <h3>Device File Explorer &amp; Direct Head Reader</h3>
+        <p>Explore device storage (`/sdcard`, internal sandbox, tmp), inspect text files directly with `read_device_file`, create directories, delete, and move files on device.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">☁️</div>
+        <h3>Google Cloud Device Streaming</h3>
+        <p>Connect and reserve real remote physical devices (Pixel 10 Pro, Galaxy S24, foldables) over secure ADB-over-SSL using the official Android CLI.</p>
       </div>
 
       <div class="feature-card">
@@ -1223,23 +1235,24 @@
     </div>
   </section>
 
-  <!-- 51 Tools Catalog -->
+  <!-- 62 Tools Catalog -->
   <section class="container tools-section" id="tools">
     <div class="section-title-wrap">
       <div class="section-tag">Complete Reference</div>
-      <h2 class="section-title">51 MCP Tools for AI Agents</h2>
+      <h2 class="section-title">62 MCP Tools for AI Agents</h2>
       <p class="section-desc">Every tool is typed, normalized, and integrated with automatic sticky target resolution.</p>
     </div>
 
     <!-- Filter Tabs -->
     <div class="tools-filter-bar">
-      <button class="filter-tab active" onclick="filterTools('all')">All (51)</button>
+      <button class="filter-tab active" onclick="filterTools('all')">All (62)</button>
       <button class="filter-tab" onclick="filterTools('discovery')">Discovery (3)</button>
-      <button class="filter-tab" onclick="filterTools('vision')">Eyes &amp; Hands (8)</button>
+      <button class="filter-tab" onclick="filterTools('vision')">Eyes &amp; Hands (11)</button>
       <button class="filter-tab" onclick="filterTools('lifecycle')">App Lifecycle (10)</button>
       <button class="filter-tab" onclick="filterTools('db')">Databases &amp; Prefs (16)</button>
       <button class="filter-tab" onclick="filterTools('diagnostics')">Diagnostics &amp; Power (11)</button>
-      <button class="filter-tab" onclick="filterTools('system')">Files &amp; Shell (3)</button>
+      <button class="filter-tab" onclick="filterTools('system')">Files &amp; Explorer (8)</button>
+      <button class="filter-tab" onclick="filterTools('cloud')">Cloud Streaming (3)</button>
     </div>
 
     <!-- Search Input -->
@@ -1318,6 +1331,9 @@
       // Vision & Hands
       { name: "take_screenshot", cat: "vision", badge: "Eyes", desc: "Captures a live device screenshot as a multimodal PNG image for AI vision." },
       { name: "dump_view_hierarchy", cat: "vision", badge: "Eyes", desc: "Dumps structured on-screen UI hierarchy JSON with bounding boxes and click states." },
+      { name: "tap_by_text", cat: "vision", badge: "Semantic", desc: "Directly finds an on-screen element by visible text, computes its center bounds, and taps it." },
+      { name: "tap_by_id", cat: "vision", badge: "Semantic", desc: "Directly finds an on-screen element by Android resource-id and dispatches touch tap." },
+      { name: "assert_ui_element", cat: "vision", badge: "Semantic", desc: "Verifies whether a matching UI element (by text, ID, or description) is currently visible." },
       { name: "tap_element", cat: "vision", badge: "Hands", desc: "Finds UI element by text, resource-id, or content-desc and taps its center." },
       { name: "tap_coordinates", cat: "vision", badge: "Hands", desc: "Performs precision touch event at explicit (x, y) pixel coordinates." },
       { name: "input_text", cat: "vision", badge: "Hands", desc: "Types text into active input field with automated shell and space escaping." },
@@ -1368,10 +1384,20 @@
       { name: "toggle_animations", cat: "diagnostics", badge: "Controls", desc: "Enables or disables system UI animations (1.0x / 0.0x)." },
       { name: "send_broadcast", cat: "diagnostics", badge: "Controls", desc: "Sends custom Android broadcast intent with action and typed extras map." },
 
-      // Files & Shell
-      { name: "push_file", cat: "system", badge: "System", desc: "Transfers local file or directory from host machine to device path." },
-      { name: "pull_file", cat: "system", badge: "System", desc: "Transfers file or directory from Android device to host machine." },
-      { name: "execute_shell_command", cat: "system", badge: "System", desc: "Executes arbitrary ADB shell commands and returns standard output." }
+      // Files & Explorer
+      { name: "list_directory", cat: "system", badge: "Explorer", desc: "Lists all files/directories at a remote path with permissions, size, and date." },
+      { name: "read_device_file", cat: "system", badge: "Explorer", desc: "Directly reads text content of a remote file on device without downloading to host." },
+      { name: "create_directory", cat: "system", badge: "Explorer", desc: "Recursively creates a directory on the device filesystem (mkdir -p)." },
+      { name: "delete_file", cat: "system", badge: "Explorer", desc: "Recursively deletes a file or directory on the device (rm -rf)." },
+      { name: "move_file", cat: "system", badge: "Explorer", desc: "Moves or renames a file or directory on the device (mv)." },
+      { name: "push_file", cat: "system", badge: "Transfer", desc: "Transfers local file or directory from host machine to device path." },
+      { name: "pull_file", cat: "system", badge: "Transfer", desc: "Transfers file or directory from Android device to host machine." },
+      { name: "execute_shell_command", cat: "system", badge: "Shell", desc: "Executes arbitrary ADB shell commands and returns standard output." },
+
+      // Cloud Streaming
+      { name: "list_cloud_devices", cat: "cloud", badge: "Cloud", desc: "Lists remote physical devices (Pixel 10 Pro, foldables) available via Android CLI." },
+      { name: "start_cloud_device_stream", cat: "cloud", badge: "Cloud", desc: "Reserves a real remote physical device over secure ADB-over-SSL." },
+      { name: "stop_cloud_device_stream", cat: "cloud", badge: "Cloud", desc: "Releases an active cloud device streaming reservation session." }
     ];
 
     let currentCat = "all";

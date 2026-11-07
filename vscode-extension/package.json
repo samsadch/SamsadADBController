@@ -2,7 +2,7 @@
   "name": "adb-controller-by-samsad",
   "displayName": "ADB Controller by Samsad",
   "description": "Fast, 100% offline ADB controls: app management, live SharedPreferences editor, battery/doze simulator, virtual nav, deep links, and device tools.",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "publisher": "SamsadChalilValappil",
   "repository": {
     "type": "git",
@@ -26,7 +26,10 @@
     "deep-link",
     "broadcast",
     "restart",
-    "clear-data"
+    "clear-data",
+    "logcat",
+    "memory-profiler",
+    "file-transfer"
   ],
   "icon": "resources/icon.png",
   "main": "./dist/extension.js",
@@ -88,6 +91,18 @@
       {
         "command": "samsad-adb.toggleAnimations",
         "title": "Samsad ADB: Toggle Animations"
+      },
+      {
+        "command": "samsad-adb.dumpLogcat",
+        "title": "Samsad ADB: Dump Logcat Logs"
+      },
+      {
+        "command": "samsad-adb.clearLogcat",
+        "title": "Samsad ADB: Clear Logcat Buffer"
+      },
+      {
+        "command": "samsad-adb.inspectMemory",
+        "title": "Samsad ADB: Inspect App Memory Usage"
       }
     ],
     "configuration": {

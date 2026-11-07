@@ -103,6 +103,54 @@ export function activate(context: vscode.ExtensionContext) {
       } catch (e: any) {
         vscode.window.showErrorMessage(`Samsad ADB Error: ${e.message}`);
       }
+    }),
+    vscode.commands.registerCommand('samsad-adb.dumpLogcat', async () => {
+      const devices = await executor().getConnectedDevices();
+      if (devices.length === 0) {
+        vscode.window.showErrorMessage('Samsad ADB: No connected devices found.');
+        return;
+      }
+      try {
+        const res = await executor().getLogcat(devices[0].id, { lineLimit: 100 });
+        const doc = await vscode.workspace.openTextDocument({
+          content: res.lines.join('\n'),
+          language: 'log'
+        });
+        await vscode.window.showTextDocument(doc);
+      } catch (e: any) {
+        vscode.window.showErrorMessage(`Samsad ADB Logcat Error: ${e.message}`);
+      }
+    }),
+    vscode.commands.registerCommand('samsad-adb.clearLogcat', async () => {
+      const devices = await executor().getConnectedDevices();
+      if (devices.length === 0) {
+        vscode.window.showErrorMessage('Samsad ADB: No connected devices found.');
+        return;
+      }
+      try {
+        const msg = await executor().clearLogcat(devices[0].id);
+        vscode.window.showInformationMessage(`Samsad ADB: ${msg}`);
+      } catch (e: any) {
+        vscode.window.showErrorMessage(`Samsad ADB Error: ${e.message}`);
+      }
+    }),
+    vscode.commands.registerCommand('samsad-adb.inspectMemory', async () => {
+      const devices = await executor().getConnectedDevices();
+      if (devices.length === 0) {
+        vscode.window.showErrorMessage('Samsad ADB: No connected devices found.');
+        return;
+      }
+      const pkg = await vscode.window.showInputBox({ prompt: 'Enter package name to inspect memory' });
+      if (pkg) {
+        try {
+          const mem = await executor().getAppMemory(devices[0].id, pkg);
+          vscode.window.showInformationMessage(
+            `Samsad ADB [${pkg}] Memory: Total PSS = ${mem.totalPssMb} MB | Total RSS = ${mem.totalRssMb} MB`
+          );
+        } catch (e: any) {
+          vscode.window.showErrorMessage(`Samsad ADB Memory Error: ${e.message}`);
+        }
+      }
     })
   );
 }

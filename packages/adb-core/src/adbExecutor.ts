@@ -113,7 +113,27 @@ export class AdbExecutor {
     return diagnostics.getAppMemory(this.runner, d, pkg);
   }
 
-  // --- file transfers & shell -----------------------------------------------------------
+  // --- file transfers, explorer & shell --------------------------------------------------
+
+  public listDirectory(d: string, remotePath?: string) {
+    return files.listDirectory(this.runner, d, remotePath);
+  }
+
+  public createDirectory(d: string, remotePath: string) {
+    return files.createDirectory(this.runner, d, remotePath);
+  }
+
+  public deleteDeviceFile(d: string, remotePath: string) {
+    return files.deleteDeviceFile(this.runner, d, remotePath);
+  }
+
+  public moveDeviceFile(d: string, sourcePath: string, destPath: string) {
+    return files.moveDeviceFile(this.runner, d, sourcePath, destPath);
+  }
+
+  public readDeviceFileText(d: string, remotePath: string, options?: { maxLines?: number }) {
+    return files.readDeviceFileText(this.runner, d, remotePath, options);
+  }
 
   public pushFile(d: string, localPath: string, remotePath: string, options?: { timeoutMs?: number }) {
     return files.pushFile(this.runner, d, localPath, remotePath, options);
