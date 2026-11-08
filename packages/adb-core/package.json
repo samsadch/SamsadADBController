@@ -1,6 +1,6 @@
 {
   "name": "@samsadch/adb-core",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Shared ADB capability layer for the ADB Controller VS Code extension and MCP server.",
   "license": "MIT",
   "main": "./out/index.js",
