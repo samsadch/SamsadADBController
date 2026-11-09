@@ -62,11 +62,33 @@ Compact button strip with tooltips:
 - Create new folders, rename/move items, and delete files/folders remotely.
 - Integrated file upload (push to device) and file download (pull to host).
 
-### 🔗 8. Deep Link & URL Tester
+### ☁️ 8. Google Cloud Device Streaming
+- Connect to remote physical Android devices hosted in Google Cloud (Pixel 10 Pro, Pixel 9 Pro, Galaxy S24, Pixel Fold) directly from the VS Code Webview sidebar.
+- One-click **Start Stream** creates an encrypted ADB-over-SSL bridge tunnel.
+- One-click **Stop Stream** safely disconnects and releases the cloud reservation.
+
+### 🎯 9. Semantic UI & Automator Actions
+- **👆 Tap by Text**: Locate any visible button, header, or label by text (e.g. `"Sign In"`, `"Submit"`) and tap its center.
+- **👆 Tap by Resource ID**: Directly tap components by ID (`"btn_submit"`).
+- **🔍 Assert UI Element**: Validate whether a required element or text is present on the screen with instant pass/fail status.
+- **🌳 Dump UI Tree**: Inspect the live UI hierarchy tree with bounding boxes.
+
+### ▶️ 10. Web Project Play Runner (Dev, Prod, Build, Deploy)
+- **Status Bar Play Button**: Click **`$(play) Run Project`** on the status bar or the Webview header.
+- **Auto Configuration Detector**: Automatically scans `package.json` and detects Next.js, Vite, React, Vue, Angular, Astro, or Svelte.
+- **Presets & Configurations**:
+  - `⚡ Dev Mode` (`npm run dev` / `npm start`)
+  - `🚀 Production Run` (`npm start` / `npm run serve`)
+  - `📦 Build Project` (`npm run build`)
+  - `🌐 Deploy Project` (`npm run deploy`)
+  - `⚡ Custom Scripts...` (interactive QuickPick menu)
+- Spawns in an integrated VS Code terminal named `"Web Project Runner"`.
+
+### 🔗 11. Deep Link & URL Tester
 - Enter custom scheme (e.g. `myapp://details?id=123`) or web link (e.g. `https://example.com`).
 - Click **🚀 Open Deep Link** to dispatch directly to the device.
 
-### 📢 9. Broadcast & Intent Tester
+### 📢 12. Broadcast & Intent Tester
 - Enter broadcast action (e.g. `com.example.MY_NOTIFICATION`).
 - Enter optional extra parameters (`key=value`).
 - Click **📢 Send Broadcast** to trigger local receivers.

@@ -8,7 +8,22 @@ import { AdbConfig, AdbExecutor as CoreAdbExecutor } from '@samsadch/adb-core';
  * is the only place that reads extension settings and hands them over as plain config.
  */
 
-export type { AdbDevice, SqlQueryResult, DeviceInfo, LogcatResult, MemoryInfo, ShellCommandResult, DeviceFileEntry } from '@samsadch/adb-core';
+export type {
+  AdbDevice,
+  SqlQueryResult,
+  DeviceInfo,
+  LogcatResult,
+  MemoryInfo,
+  ShellCommandResult,
+  DeviceFileEntry,
+  StreamingDevice,
+  StreamingSessionResult,
+  UiHierarchyResult,
+  UiNode,
+  SelectorOptions,
+  TapSelectorResult,
+  AssertUiResult
+} from '@samsadch/adb-core';
 
 function readConfig(): AdbConfig {
   const settings = vscode.workspace.getConfiguration('samsadAdb');

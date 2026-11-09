@@ -5,6 +5,9 @@ import { getDeviceInfo, listDevices } from './devices';
 import * as diagnostics from './diagnostics';
 import { AdbRunner } from './exec';
 import * as files from './files';
+import * as semanticUi from './semanticUi';
+import * as deviceStreaming from './deviceStreaming';
+import * as uiHierarchy from './uiHierarchy';
 import { getCandidateAdbPaths } from './adbPath';
 import { autoDetectPackage } from './packageDetect';
 import { captureScreenshot } from './screenshot';
@@ -189,5 +192,37 @@ export class AdbExecutor {
 
   public async autoDetectPackage(rootPaths: string[]): Promise<string | null> {
     return autoDetectPackage(rootPaths);
+  }
+
+  // --- semantic UI & automator -----------------------------------------------------------
+
+  public dumpViewHierarchy(d: string, options?: uiHierarchy.ParseOptions) {
+    return uiHierarchy.dumpViewHierarchy(this.runner, d, options);
+  }
+
+  public tapBySelector(d: string, selector: semanticUi.SelectorOptions) {
+    return semanticUi.tapBySelector(this.runner, d, selector);
+  }
+
+  public assertUiElement(d: string, selector: semanticUi.SelectorOptions) {
+    return semanticUi.assertUiElement(this.runner, d, selector);
+  }
+
+  // --- cloud device streaming ------------------------------------------------------------
+
+  public checkAndroidCliAvailable() {
+    return deviceStreaming.checkAndroidCliAvailable();
+  }
+
+  public listStreamingDevices() {
+    return deviceStreaming.listStreamingDevices();
+  }
+
+  public startDeviceStream(cloudDeviceId: string, options?: { project?: string; timeoutMinutes?: number }) {
+    return deviceStreaming.startDeviceStream(cloudDeviceId, options);
+  }
+
+  public stopDeviceStream(cloudDeviceId: string) {
+    return deviceStreaming.stopDeviceStream(cloudDeviceId);
   }
 }

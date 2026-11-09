@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { AdbViewProvider } from './adbViewProvider';
 import { AdbExecutor } from './adbExecutor';
+import { ProjectRunner } from './projectRunner';
 
 export function activate(context: vscode.ExtensionContext) {
   const provider = new AdbViewProvider(context.extensionUri);
@@ -8,6 +9,14 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(AdbViewProvider.viewType, provider)
   );
+
+  // Status Bar Play Button for Project Configurations (dev, prod, build, deploy)
+  const runStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
+  runStatusBarItem.command = 'samsad-adb.runWebProject';
+  runStatusBarItem.text = '$(play) Run Project';
+  runStatusBarItem.tooltip = 'Run Web Project: Dev, Prod, Build, Deploy & Custom Scripts';
+  runStatusBarItem.show();
+  context.subscriptions.push(runStatusBarItem);
 
   // Path settings feed the shared core at construction, so drop the cached instance when
   // they change rather than requiring a window reload.
@@ -151,6 +160,9 @@ export function activate(context: vscode.ExtensionContext) {
           vscode.window.showErrorMessage(`Samsad ADB Memory Error: ${e.message}`);
         }
       }
+    }),
+    vscode.commands.registerCommand('samsad-adb.runWebProject', async () => {
+      await ProjectRunner.promptAndRunScript();
     })
   );
 }

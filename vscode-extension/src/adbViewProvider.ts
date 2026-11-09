@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as os from 'os';
 import { AdbExecutor, AdbDevice } from './adbExecutor';
+import { ProjectRunner } from './projectRunner';
 
 export class AdbViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = 'samsadAdbView';
@@ -519,6 +520,143 @@ export class AdbViewProvider implements vscode.WebviewViewProvider {
           }
           break;
         }
+
+        // ==========================================
+        // Cloud Device Streaming
+        // ==========================================
+        case 'checkCloudCli': {
+          const avail = await executor.checkAndroidCliAvailable();
+          this._view?.webview.postMessage({ type: 'setCloudCliStatus', available: avail });
+          break;
+        }
+
+        case 'listCloudDevices': {
+          this.postStatus('loading', '⏳ Discovering Google Cloud devices...');
+          try {
+            const devices = await executor.listStreamingDevices();
+            this.postStatus('success', `✓ Found ${devices.length} cloud device(s)`);
+            this._view?.webview.postMessage({ type: 'setCloudDevices', devices });
+          } catch (e: any) {
+            this.postStatus('error', `✕ Cloud devices: ${e.message?.slice(0, 70)}`);
+            this._view?.webview.postMessage({ type: 'setCloudDevices', devices: [], error: e.message });
+          }
+          break;
+        }
+
+        case 'startCloudStream': {
+          const { cloudDeviceId } = data;
+          if (!cloudDeviceId) return;
+          this.postStatus('loading', `⏳ Reserving & streaming ${cloudDeviceId}...`);
+          try {
+            const res = await executor.startDeviceStream(cloudDeviceId);
+            this.postStatus('success', `✓ Connected stream for ${cloudDeviceId}`);
+            this.refresh();
+            this._view?.webview.postMessage({ type: 'cloudStreamStarted', result: res });
+          } catch (e: any) {
+            this.postStatus('error', `✕ Stream failed: ${e.message?.slice(0, 70)}`);
+            this._view?.webview.postMessage({ type: 'cloudStreamStarted', error: e.message });
+          }
+          break;
+        }
+
+        case 'stopCloudStream': {
+          const { cloudDeviceId } = data;
+          if (!cloudDeviceId) return;
+          this.postStatus('loading', `⏳ Releasing ${cloudDeviceId}...`);
+          try {
+            const res = await executor.stopDeviceStream(cloudDeviceId);
+            this.postStatus('success', `✓ Released cloud stream`);
+            this.refresh();
+            this._view?.webview.postMessage({ type: 'cloudStreamStopped', result: res });
+          } catch (e: any) {
+            this.postStatus('error', `✕ Disconnect failed: ${e.message?.slice(0, 70)}`);
+            this._view?.webview.postMessage({ type: 'cloudStreamStopped', error: e.message });
+          }
+          break;
+        }
+
+        // ==========================================
+        // Semantic UI Actions
+        // ==========================================
+        case 'dumpUiHierarchy': {
+          if (!deviceId) return;
+          this.postStatus('loading', '⏳ Dumping UI Automator hierarchy...');
+          try {
+            const hier = await executor.dumpViewHierarchy(deviceId);
+            this.postStatus('success', `✓ UI hierarchy: ${hier.nodes.length} nodes parsed`);
+            this._view?.webview.postMessage({ type: 'setUiHierarchy', hierarchy: hier });
+          } catch (e: any) {
+            this.postStatus('error', `✕ UI hierarchy error: ${e.message?.slice(0, 60)}`);
+          }
+          break;
+        }
+
+        case 'tapByText': {
+          const { text } = data;
+          if (!deviceId || !text) return;
+          this.postStatus('loading', `⏳ Tapping element with text "${text}"...`);
+          try {
+            const res = await executor.tapBySelector(deviceId, { text });
+            this.postStatus('success', `✓ Tapped "${text}" at (${res.x}, ${res.y})`);
+            this._view?.webview.postMessage({ type: 'semanticActionResult', success: true, message: `Tapped "${text}" at (${res.x}, ${res.y})` });
+          } catch (e: any) {
+            this.postStatus('error', `✕ Tap failed: ${e.message?.slice(0, 60)}`);
+            this._view?.webview.postMessage({ type: 'semanticActionResult', success: false, message: e.message });
+          }
+          break;
+        }
+
+        case 'tapById': {
+          const { resId } = data;
+          if (!deviceId || !resId) return;
+          this.postStatus('loading', `⏳ Tapping element with ID "${resId}"...`);
+          try {
+            const res = await executor.tapBySelector(deviceId, { resourceId: resId });
+            this.postStatus('success', `✓ Tapped ID "${resId}" at (${res.x}, ${res.y})`);
+            this._view?.webview.postMessage({ type: 'semanticActionResult', success: true, message: `Tapped "${resId}" at (${res.x}, ${res.y})` });
+          } catch (e: any) {
+            this.postStatus('error', `✕ Tap ID failed: ${e.message?.slice(0, 60)}`);
+            this._view?.webview.postMessage({ type: 'semanticActionResult', success: false, message: e.message });
+          }
+          break;
+        }
+
+        case 'assertUiElement': {
+          const { selectorType, query } = data;
+          if (!deviceId || !query) return;
+          this.postStatus('loading', `⏳ Asserting element ${selectorType}="${query}"...`);
+          try {
+            const selector = selectorType === 'id' ? { resourceId: query } : { text: query };
+            const res = await executor.assertUiElement(deviceId, selector);
+            if (res.found) {
+              this.postStatus('success', `✓ Element FOUND: ${query}`);
+            } else {
+              this.postStatus('error', `✕ Element NOT FOUND: ${query}`);
+            }
+            this._view?.webview.postMessage({ type: 'assertResult', result: res });
+          } catch (e: any) {
+            this.postStatus('error', `✕ Assert failed: ${e.message?.slice(0, 60)}`);
+          }
+          break;
+        }
+
+        // ==========================================
+        // Project Play Runner
+        // ==========================================
+        case 'fetchProjectScripts': {
+          const result = await ProjectRunner.getAvailableScripts();
+          this._view?.webview.postMessage({ type: 'setProjectScripts', projectType: result.projectType, scripts: result.scripts });
+          break;
+        }
+
+        case 'runProjectCommand': {
+          const { scriptCommand } = data;
+          if (scriptCommand) {
+            ProjectRunner.executeCommandInTerminal(scriptCommand);
+            this.postStatus('success', `✓ Running in terminal: ${scriptCommand}`);
+          }
+          break;
+        }
       }
     });
 
@@ -857,15 +995,52 @@ export class AdbViewProvider implements vscode.WebviewViewProvider {
   </style>
 </head>
 <body>
+  <!-- Web Project Play Runner Card -->
+  <div class="card" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%); border-left: 3px solid #38bdf8;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+      <div style="font-weight: 700; font-size: 11.5px; color: #38bdf8; display: flex; align-items: center; gap: 5px;">
+        <span>▶️ Project Runner</span>
+        <span id="projectRunnerBadge" style="font-size: 9.5px; padding: 1px 5px; border-radius: 4px; background: rgba(56, 189, 248, 0.2); color: #7dd3fc;">Web Project</span>
+      </div>
+      <button class="btn btn-xs" id="quickPickPlayBtn" title="Choose script configuration to run" style="background: #0284c7; color: #fff; font-weight: 600; padding: 2px 8px;">▶ Run...</button>
+    </div>
+    <div style="display: flex; gap: 4px; flex-wrap: wrap;" id="projectQuickButtons">
+      <button class="btn btn-xs" id="runDevBtn" style="flex: 1; min-width: 60px; height: 24px; font-size: 10px;">⚡ Dev</button>
+      <button class="btn btn-xs" id="runProdBtn" style="flex: 1; min-width: 60px; height: 24px; font-size: 10px;">🚀 Prod</button>
+      <button class="btn btn-xs" id="runBuildBtn" style="flex: 1; min-width: 60px; height: 24px; font-size: 10px;">📦 Build</button>
+      <button class="btn btn-xs" id="runDeployBtn" style="flex: 1; min-width: 60px; height: 24px; font-size: 10px;">🌐 Deploy</button>
+    </div>
+  </div>
+
   <!-- Target Device -->
   <div class="field-group">
-    <label class="field-label">Target Device</label>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <label class="field-label" style="margin: 0;">Target Device</label>
+      <button id="toggleCloudStreamBtn" style="background: transparent; border: none; color: #38bdf8; font-size: 10.5px; cursor: pointer; text-decoration: underline;">☁️ Cloud Devices</button>
+    </div>
     <div class="input-row">
       <select id="deviceSelect">
         <option value="">Scanning devices...</option>
       </select>
       <button class="btn btn-icon" id="refreshBtn" title="Refresh Devices">🔄</button>
     </div>
+  </div>
+
+  <!-- Cloud Device Streaming Drawer (collapsible) -->
+  <div id="cloudStreamDrawer" class="card" style="display: none; background: #131b26; border: 1px solid #1e3a5f; margin-bottom: 8px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+      <div style="font-weight: 600; font-size: 11px; color: #93c5fd;">☁️ Google Cloud Device Streaming</div>
+      <button class="btn btn-xs" id="fetchCloudDevicesBtn" style="height: 22px; padding: 0 6px; font-size: 10px;">🔄 Discover</button>
+    </div>
+    <div id="cloudCliWarning" style="display: none; font-size: 10px; color: #f87171; margin-bottom: 4px; padding: 4px; background: rgba(239,68,68,0.1); border-radius: 4px;"></div>
+    <div style="display: flex; gap: 4px; margin-bottom: 6px;">
+      <select id="cloudDeviceSelect" style="flex: 1; height: 26px; font-size: 11px;">
+        <option value="">Click 'Discover' to list cloud devices...</option>
+      </select>
+      <button class="btn btn-xs" id="startStreamBtn" style="background: #2563eb; color: #fff; height: 26px;">▶ Stream</button>
+      <button class="btn btn-xs" id="stopStreamBtn" style="background: #475569; color: #fff; height: 26px;">⏹ Stop</button>
+    </div>
+    <div style="font-size: 9.5px; color: #94a3b8;">Streams physical Pixel & Galaxy devices directly into local ADB over SSL.</div>
   </div>
 
   <!-- Package Name -->
@@ -1213,6 +1388,32 @@ export class AdbViewProvider implements vscode.WebviewViewProvider {
     </div>
   </div>
 
+  <!-- Section 9: Semantic UI & Automator Actions -->
+  <div class="card">
+    <div class="card-title">9. Semantic UI & Automator Actions</div>
+    <div style="font-size: 10.5px; color: #888; margin-bottom: 6px;">Interact with on-screen elements directly by visible text or resource ID.</div>
+    <div style="display: flex; gap: 4px; margin-bottom: 6px;">
+      <input type="text" id="semanticTextInput" placeholder='Visible text (e.g. "Sign In", "OK")' style="flex: 1; height: 26px; font-size: 11px;" />
+      <button class="btn btn-xs" id="tapTextBtn" style="height: 26px; padding: 0 8px; font-weight: 600;">👆 Tap Text</button>
+    </div>
+    <div style="display: flex; gap: 4px; margin-bottom: 6px;">
+      <input type="text" id="semanticIdInput" placeholder='Resource ID (e.g. "btn_submit")' style="flex: 1; height: 26px; font-size: 11px;" />
+      <button class="btn btn-xs" id="tapIdBtn" style="height: 26px; padding: 0 8px; font-weight: 600;">👆 Tap ID</button>
+    </div>
+    <div style="display: flex; gap: 4px; margin-bottom: 6px;">
+      <input type="text" id="assertInput" placeholder='Text or ID to verify on screen...' style="flex: 1; height: 26px; font-size: 11px;" />
+      <select id="assertTypeSelect" style="width: 75px; height: 26px; font-size: 11px;">
+        <option value="text">Text</option>
+        <option value="id">ID</option>
+      </select>
+      <button class="btn btn-xs" id="assertBtn" style="height: 26px; padding: 0 8px; background: #059669; color: #fff;">🔍 Assert</button>
+    </div>
+    <div style="display: flex; gap: 4px;">
+      <button class="btn btn-xs" id="dumpHierarchyBtn" style="flex: 1; height: 24px; font-size: 10.5px;">🌳 Dump UI Tree</button>
+    </div>
+    <div id="hierarchyViewer" style="display: none; margin-top: 6px; max-height: 140px; overflow-y: auto; font-family: monospace; font-size: 10px; background: #141619; border: 1px solid #333; padding: 4px; border-radius: 4px;"></div>
+  </div>
+
   <!-- Status Pill -->
   <div>
     <div id="statusBadge" class="status-badge">ℹ️ Ready</div>
@@ -1239,6 +1440,124 @@ export class AdbViewProvider implements vscode.WebviewViewProvider {
     const addPrefRowBtn = document.getElementById('addPrefRowBtn');
     const savePrefBtn = document.getElementById('savePrefBtn');
     const saveRestartPrefBtn = document.getElementById('saveRestartPrefBtn');
+
+    // Project Runner wiring
+    const projectRunnerBadge = document.getElementById('projectRunnerBadge');
+    const quickPickPlayBtn = document.getElementById('quickPickPlayBtn');
+    const runDevBtn = document.getElementById('runDevBtn');
+    const runProdBtn = document.getElementById('runProdBtn');
+    const runBuildBtn = document.getElementById('runBuildBtn');
+    const runDeployBtn = document.getElementById('runDeployBtn');
+
+    quickPickPlayBtn.addEventListener('click', () => {
+      vscode.postMessage({ command: 'runProjectCommand', scriptCommand: '' });
+      // Triggers the main extension QuickPick via vscode command
+    });
+
+    runDevBtn.addEventListener('click', () => {
+      vscode.postMessage({ command: 'runProjectCommand', scriptCommand: 'npm run dev || npm start' });
+    });
+    runProdBtn.addEventListener('click', () => {
+      vscode.postMessage({ command: 'runProjectCommand', scriptCommand: 'npm run start || npm run serve' });
+    });
+    runBuildBtn.addEventListener('click', () => {
+      vscode.postMessage({ command: 'runProjectCommand', scriptCommand: 'npm run build' });
+    });
+    runDeployBtn.addEventListener('click', () => {
+      vscode.postMessage({ command: 'runProjectCommand', scriptCommand: 'npm run deploy' });
+    });
+
+    // Cloud Device Streaming wiring
+    const toggleCloudStreamBtn = document.getElementById('toggleCloudStreamBtn');
+    const cloudStreamDrawer = document.getElementById('cloudStreamDrawer');
+    const fetchCloudDevicesBtn = document.getElementById('fetchCloudDevicesBtn');
+    const cloudDeviceSelect = document.getElementById('cloudDeviceSelect');
+    const startStreamBtn = document.getElementById('startStreamBtn');
+    const stopStreamBtn = document.getElementById('stopStreamBtn');
+    const cloudCliWarning = document.getElementById('cloudCliWarning');
+
+    toggleCloudStreamBtn.addEventListener('click', () => {
+      const isHidden = cloudStreamDrawer.style.display === 'none';
+      cloudStreamDrawer.style.display = isHidden ? 'block' : 'none';
+      if (isHidden) {
+        vscode.postMessage({ command: 'checkCloudCli' });
+        vscode.postMessage({ command: 'listCloudDevices' });
+      }
+    });
+
+    fetchCloudDevicesBtn.addEventListener('click', () => {
+      vscode.postMessage({ command: 'checkCloudCli' });
+      vscode.postMessage({ command: 'listCloudDevices' });
+    });
+
+    startStreamBtn.addEventListener('click', () => {
+      const dev = cloudDeviceSelect.value;
+      if (!dev) {
+        setStatus('error', '✕ Select a cloud device first');
+        return;
+      }
+      vscode.postMessage({ command: 'startCloudStream', cloudDeviceId: dev });
+    });
+
+    stopStreamBtn.addEventListener('click', () => {
+      const dev = cloudDeviceSelect.value;
+      if (!dev) {
+        setStatus('error', '✕ Select a cloud device first');
+        return;
+      }
+      vscode.postMessage({ command: 'stopCloudStream', cloudDeviceId: dev });
+    });
+
+    // Semantic UI wiring
+    const semanticTextInput = document.getElementById('semanticTextInput');
+    const tapTextBtn = document.getElementById('tapTextBtn');
+    const semanticIdInput = document.getElementById('semanticIdInput');
+    const tapIdBtn = document.getElementById('tapIdBtn');
+    const assertInput = document.getElementById('assertInput');
+    const assertTypeSelect = document.getElementById('assertTypeSelect');
+    const assertBtn = document.getElementById('assertBtn');
+    const dumpHierarchyBtn = document.getElementById('dumpHierarchyBtn');
+    const hierarchyViewer = document.getElementById('hierarchyViewer');
+
+    tapTextBtn.addEventListener('click', () => {
+      const deviceId = deviceSelect.value;
+      const text = semanticTextInput.value.trim();
+      if (!deviceId || !text) {
+        setStatus('error', '✕ Select a device & enter text to tap');
+        return;
+      }
+      vscode.postMessage({ command: 'tapByText', deviceId, text });
+    });
+
+    tapIdBtn.addEventListener('click', () => {
+      const deviceId = deviceSelect.value;
+      const resId = semanticIdInput.value.trim();
+      if (!deviceId || !resId) {
+        setStatus('error', '✕ Select a device & enter resource ID to tap');
+        return;
+      }
+      vscode.postMessage({ command: 'tapById', deviceId, resId });
+    });
+
+    assertBtn.addEventListener('click', () => {
+      const deviceId = deviceSelect.value;
+      const query = assertInput.value.trim();
+      const selectorType = assertTypeSelect.value;
+      if (!deviceId || !query) {
+        setStatus('error', '✕ Select a device & enter text/ID to assert');
+        return;
+      }
+      vscode.postMessage({ command: 'assertUiElement', deviceId, query, selectorType });
+    });
+
+    dumpHierarchyBtn.addEventListener('click', () => {
+      const deviceId = deviceSelect.value;
+      if (!deviceId) {
+        setStatus('error', '✕ Select a connected device');
+        return;
+      }
+      vscode.postMessage({ command: 'dumpUiHierarchy', deviceId });
+    });
 
     refreshBtn.addEventListener('click', () => {
       vscode.postMessage({ command: 'refreshDevices' });
@@ -2301,6 +2620,61 @@ export class AdbViewProvider implements vscode.WebviewViewProvider {
           });
           break;
         }
+        case 'setProjectScripts': {
+          if (msg.projectType && projectRunnerBadge) {
+            projectRunnerBadge.textContent = msg.projectType;
+          }
+          break;
+        }
+        case 'setCloudCliStatus': {
+          if (!msg.available) {
+            cloudCliWarning.style.display = 'block';
+            cloudCliWarning.textContent = '⚠️ android CLI not found in PATH. Install the modern Android CLI for cloud device streaming.';
+          } else {
+            cloudCliWarning.style.display = 'none';
+          }
+          break;
+        }
+        case 'setCloudDevices': {
+          cloudDeviceSelect.innerHTML = '';
+          if (!msg.devices || msg.devices.length === 0) {
+            const opt = document.createElement('option');
+            opt.value = '';
+            opt.textContent = msg.error ? 'Error loading devices' : 'No cloud devices found';
+            cloudDeviceSelect.appendChild(opt);
+          } else {
+            msg.devices.forEach((d) => {
+              const opt = document.createElement('option');
+              opt.value = d.id;
+              opt.textContent = d.name + ' (' + d.state + ')';
+              cloudDeviceSelect.appendChild(opt);
+            });
+          }
+          break;
+        }
+        case 'setUiHierarchy': {
+          if (msg.hierarchy && msg.hierarchy.nodes) {
+            hierarchyViewer.style.display = 'block';
+            const lines = msg.hierarchy.nodes.slice(0, 30).map((n) => {
+              const bounds = n.bounds ? '[' + n.bounds.left + ',' + n.bounds.top + '][' + n.bounds.right + ',' + n.bounds.bottom + ']' : '';
+              const text = n.text ? ' "' + n.text + '"' : '';
+              const id = n.resourceId ? ' #' + n.resourceId.split('/').pop() : '';
+              return (n.className?.split('.').pop() || 'Node') + id + text + ' ' + bounds;
+            });
+            hierarchyViewer.textContent = lines.join('\n') + (msg.hierarchy.nodes.length > 30 ? '\n...and ' + (msg.hierarchy.nodes.length - 30) + ' more' : '');
+          }
+          break;
+        }
+        case 'assertResult': {
+          if (msg.result) {
+            if (msg.result.found) {
+              setStatus('success', '✓ Element found: ' + (msg.result.element?.text || msg.result.element?.resourceId || ''));
+            } else {
+              setStatus('error', '✕ Element not visible on current screen');
+            }
+          }
+          break;
+        }
         case 'setStatus': {
           setStatus(msg.statusType, msg.message);
           break;
@@ -2316,9 +2690,10 @@ export class AdbViewProvider implements vscode.WebviewViewProvider {
       }
     });
 
-    // Auto-detect connected devices and package on startup
+    // Auto-detect connected devices, package, and project scripts on startup
     vscode.postMessage({ command: 'refreshDevices' });
     vscode.postMessage({ command: 'autoDetectPackage' });
+    vscode.postMessage({ command: 'fetchProjectScripts' });
   </script>
 </body>
 </html>`;
